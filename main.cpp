@@ -3,11 +3,55 @@
 #include <iomanip>
 #include <fstream>
 #include <cmath>
+#include <math.h>
 
 using namespace std;
 
 //file io declarations
+void saveAsPPM(const std::vector<std::vector<std::vector<int>>>& img, const std::string& filename) {
+    // Get dimensions
+    size_t height = img.size();
+    size_t width = height > 0 ? img[0].size() : 0;
+
+    // Open output file
+    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    if (!file) {
+        std::cerr << "Error: Unable to open file " << filename << "\n";
+        return;
+    }
+
+    // Write PPM header
+    file << "P6\n" << width << " " << height << "\n255\n";
+
+    // Write pixel data
+    for (const auto& row : img) {
+        for (const auto& pixel : row) {
+            // Ensure pixel has exactly three components
+            //if (pixel.size() != 3) {
+            //   std::cerr << "Error: Pixel data must have exactly 3 color channels (R, G, B).\n";
+            //   return;
+            //}
+            // Convert [0.0, 1.0] to [0, 255] and write as binary
+            char r = static_cast<char>(pixel[0]);
+            char g = static_cast<char>(pixel[1]);
+            char b = static_cast<char>(pixel[2]);
+            file.write(&r, 1);
+            file.write(&g, 1);
+            file.write(&b, 1);
+        }
+    }
+
+    file.close();
+    if (!file) {
+        std::cerr << "Error: Failed to properly write to file " << filename << "\n";
+    } else {
+        std::cout << "Image saved as " << filename << "\n";
+    }
+}
 void saveAsPPM(const std::vector<std::vector<std::vector<double>>>& uvs, const std::string& filename) {
+    
+    //normalize
+    
     // Get dimensions
     size_t height = uvs.size();
     size_t width = height > 0 ? uvs[0].size() : 0;
@@ -31,12 +75,25 @@ void saveAsPPM(const std::vector<std::vector<std::vector<double>>>& uvs, const s
             //   return;
             //}
             // Convert [0.0, 1.0] to [0, 255] and write as binary
-            char r = static_cast<char>(pixel[0] * 255);
-            char g = static_cast<char>(pixel[1] * 255);
-            char b = static_cast<char>(0);
-            file.write(&r, 1);
-            file.write(&g, 1);
-            file.write(&b, 1);
+            int dim = pixel.size();
+
+            if (dim == 2) {
+                char r = static_cast<char>(pixel[0] * 255);
+                char g = static_cast<char>(pixel[1] * 255);
+                char b = static_cast<char>(0);
+                file.write(&r, 1);
+                file.write(&g, 1);
+                file.write(&b, 1);
+            }
+            else {
+                char r = static_cast<char>(pixel[0]);
+                char g = static_cast<char>(pixel[1]);
+                char b = static_cast<char>(pixel[2]);
+                file.write(&r, 1);
+                file.write(&g, 1);
+                file.write(&b, 1);
+            }
+            
         }
     }
 
@@ -48,14 +105,95 @@ void saveAsPPM(const std::vector<std::vector<std::vector<double>>>& uvs, const s
     }
 }
 
-
-
-std::vector<double> matrix_vector_multiplication(std::vector<double> vector1, std::vector<std::vector<double>> vector2) {
-    for (int x = 0; x < vector2.size(); x++) {
-        vector1[0] = (vector2[x][0] * vector1[0]) + (vector2[x][1] * vector1[0]) + (vector2[x][2] * vector1[0]);
-    }
-    return vector1;
+double vector_difference(std::vector<double> vec1, std::vector<double> vec2) {
+    //make pythagoras proud
+    double sqare_sum = (vec1[0]-vec2[0])*(vec1[0]-vec2[0]) + ((vec1[1]-vec2[1])*(vec1[1]-vec2[1])) + (((vec1[2]-vec2[2])*(vec1[2]-vec2[2]))); 
+    return sqrt(sqare_sum);
 };
+
+std::vector<double> normalize_vector(const std::vector<double>& vec) {
+    // Calculate the magnitude of the vector
+    double magnitude = 0.0;
+    for (double val : vec) {
+        magnitude += val * val;
+    }
+    magnitude = std::sqrt(magnitude);
+
+    // Check for zero magnitude to avoid division by zero
+    if (magnitude == 0.0) {
+        throw std::invalid_argument("Cannot normalize a zero-length vector");
+    }
+
+    // Create the normalized vector
+    std::vector<double> normalized_vec(vec.size());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        normalized_vec[i] = vec[i] / magnitude;
+    }
+
+    return normalized_vec;
+}
+
+
+std::vector<double> vector_cross_product(std::vector<double> vec_a, std::vector<double> vec_b) {
+    std::vector<double> cross_product_vector = {
+        vec_a[1]*vec_b[2] - vec_a[2]*vec_b[1],
+        vec_a[2]*vec_b[0] - vec_a[0]*vec_b[2],
+        vec_a[0]*vec_b[1] - vec_a[1]*vec_b[0]
+    };
+    return cross_product_vector;
+};
+
+
+double vector_dot_product(std::vector<double> vec_a, std::vector<double> vec_b) {
+    double product = 0;
+
+    for (int i = 0; i < vec_a.size(); i++) {
+        product = product + vec_a[i]*vec_b[i];
+    };
+    return product;
+};
+
+
+std::vector<double> matrix_subration(std::vector<double> vec_a, std::vector<double> vec_b) {
+    std::vector<double> result(vec_a.size());
+
+    for (int i = 0; i < vec_a.size(); i++) {
+        result[i] = vec_a[i] - vec_b[i];
+    };
+
+    return result;
+};
+
+std::vector<double> scalar_multiply(const std::vector<double> vec, double scalar) {
+    return {vec[0] * scalar, vec[1] * scalar, vec[2] * scalar};
+}
+
+// Function to add two vectors
+std::vector<double> vector_add(const std::vector<double>& vec1, const std::vector<double>& vec2) {
+    return {vec1[0] + vec2[0], vec1[1] + vec2[1], vec1[2] + vec2[2]};
+}
+
+std::vector<double> matrix_vector_multiplication(
+    std::vector<double> vector1,
+    const std::vector<std::vector<double>>& matrix) 
+{
+    // Ensure dimensions match for multiplication
+    if (matrix.empty() || matrix[0].size() != vector1.size()) {
+        throw std::invalid_argument("Matrix and vector dimensions do not match");
+    }
+
+    // Resultant vector of size equal to the number of rows in the matrix
+    std::vector<double> result(matrix.size(), 0.0);
+
+    for (int i = 0; i < matrix.size(); ++i) {
+        for (int j = 0; j < matrix[i].size(); ++j) {
+            result[i] += matrix[i][j] * vector1[j];
+        }
+    }
+
+    return result;
+};
+
 
 std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, double fov, std::vector<double> uv) {
     //applies rotation matrix to a vector according to degrees, uv
@@ -83,10 +221,13 @@ std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, do
     //apply matrix(s) via dot product
     //...
     std::vector<double> z_corrected_matrix = matrix_vector_multiplication(input_vector, r_z);
+
     std::vector<double> x_corrected_matrix = matrix_vector_multiplication(z_corrected_matrix, r_x);
 
-
-    return x_corrected_matrix;
+    //normalize
+    std::vector<double> normalized_vector = normalize_vector(x_corrected_matrix);
+    
+    return normalized_vector;
 };
 
 
@@ -116,15 +257,16 @@ class Procedural_meshes {
     void plane(Mesh& mesh) {
         // Define new vertices and faces
         std::vector<std::vector<double>> newVertices = {
-            {0.0, 0.0, 0.0},
-            {1.0, 0.0, 0.0},
-            {1.0, 1.0, 0.0},
-            {0.0, 1.0, 0.0}
+            {0.0, -6.0, -6.0},
+            {0.0, -6.0, 6.0},
+            {0.0, 6.0, -6.0},
+            {0.0, 6.0, 6.0}
         };
 
+
         std::vector<std::vector<int>> newFaces = {
-            {0, 1, 2},  // First face
-            {0, 2, 3}   // Second face
+            {0, 1, 2},//,  // First face
+            {2, 1, 3}   // Second face
         };
 
         mesh.update_mesh(newVertices, newFaces);
@@ -144,6 +286,10 @@ class Element {
 
     //debug method
     void inspect() {
+        //for (int i = 0; i < mesh.vertices.size(); i++) {
+        //   cout << "Vertex: " << mesh.vertices[i][0] << " " << mesh.vertices[i][1] << " " << mesh.vertices[1][2] << endl;
+        //};
+
         std::cout << "Mesh has: " << mesh.vertices.size() << " vertices" << endl;
         std::cout << "Mesh has: " << mesh.faces.size() << " faces" << endl;
     };
@@ -169,14 +315,15 @@ class World {
 class Camera {
     public:
     //position
-    std::vector<double> vec3D_c_pos = {-10.0, 0.0, 0.0};
+    std::vector<double> vec3D_c_pos = {3.0, -10.0, 0.0};
     //unit vector
-    std::vector<double> vec3D_c_vec = {10.0, 0.0, 0.0};
+    std::vector<double> vec3D_c_vec = {0.0, 1.0, 0.0};
 
     //camera info
-    double fov = 90.0;
+    double fov = 75.0;
     int max_bounce = 1;
-    std::vector<int> res = {480, 480};
+    int square_res = 1024;
+    std::vector<int> res = {square_res, square_res};
 
 };
 
@@ -196,8 +343,9 @@ struct Ray {
 class OutputBuffer {
     public:
     //Creates an output buffer of empty arrays, pass in as reference
-    std::vector<std::vector<std::vector<int>>> rgb_buffer;
+    std::vector<std::vector<std::vector<double>>> rgb_buffer;
     std::vector<std::vector<std::vector<double>>> uvs;
+    std::vector<std::vector<std::vector<double>>> ray_euler;
 
     //sizes buffers accordingly (incorrect buffer sizing fails silently)
     //This can be constructor
@@ -210,10 +358,29 @@ class OutputBuffer {
                 cell.resize(2); // Each cell is a vector with 2 doubles
             }
         }
+
+        rgb_buffer.resize(res[0]);
+        for (auto& row : rgb_buffer) {
+            row.resize(res[1]);
+            for (auto& cell : row) {
+                cell.resize(2); // Each cell is a vector with 2 doubles
+            }
+        }
+
+        ray_euler.resize(res[0]);
+        for (auto& row : ray_euler) {
+            row.resize(res[1]);
+            for (auto& cell : row) {
+                cell.resize(2); // Each cell is a vector with 2 doubles
+            }
+        }
     };
 
     void output_buffers_to_file(string fileName) {
-        saveAsPPM(uvs, fileName);
+        saveAsPPM(uvs, fileName+"uv.ppm");
+        saveAsPPM(rgb_buffer, fileName+"mask.ppm");
+        saveAsPPM(ray_euler, fileName+"vec.ppm");
+
     };
 };
 
@@ -266,8 +433,16 @@ class Render {
                 std::vector<double> ray_euler = rotation_matrix_degrees(cam_euler, state.camera.fov, uv);
 
                 //print ray
-                std::cout << ray_euler[0] << " " << ray_euler[1] << " " << ray_euler[2] << endl;
+                //std::cout << ray_euler[0] << " " << ray_euler[1] << " " << ray_euler[2] << endl;
                 
+                //cast ray via function call
+
+                //create rgb pixel
+                std::vector<double> pixel = cast_ray(cam_pos, ray_euler);
+
+                //assign to buffer
+                buffer.rgb_buffer[x][y] = pixel;
+                buffer.ray_euler[x][y] = ray_euler;
 
 
             };
@@ -276,7 +451,109 @@ class Render {
 
     };
 
-    void cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler) {}; //recursive?
+    std::vector<double> cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler) {
+
+        //define intersects array
+        std::vector<std::vector<double>> intersects;
+        
+
+        //iterate through world assets
+        for (int i = 0; i < state.world.elements.size(); i++) {
+            
+            //get asset elements
+            Element element = state.world.elements[i];
+
+            //iterate through faces
+            std::vector<int> face;
+            std::vector<std::vector<double>> vertices;
+            for (int j = 0; j < element.mesh.faces.size(); j++) {
+
+                //extract face
+                face = element.mesh.faces[j];
+
+                //extract vertices
+                vertices = {
+                    element.mesh.vertices[face[0]],
+                    element.mesh.vertices[face[1]],
+                    element.mesh.vertices[face[2]]
+                };
+
+                //define edges
+                std::vector<double> edge1 = matrix_subration(vertices[1], vertices[0]); //v2-v1
+                std::vector<double> edge2 = matrix_subration(vertices[2], vertices[0]); //v3-v1
+
+                //compute normal of the 2 edges
+                //... (cross(e1,e2))
+                std::vector<double> surface_normal = vector_cross_product(edge1, edge2);
+
+                //compute determinant of edge 1 and 2
+                //...
+
+                //pvec = cross(ray_vec, e2)
+                std::vector<double> pvec = vector_cross_product(ray_euler, edge2);
+
+                //det = dot(e1, pvec)
+                double determinant = vector_dot_product(edge1, pvec);
+
+                //ray parrallel optimization
+                if (determinant == 0) {
+                    //cout << "Ray Parralell";
+                    continue;
+                };
+
+                //compute inverse determinant
+                double inverse_determinant =  1 / determinant;
+
+                //compute u in normal space
+                std::vector<double> tvec = matrix_subration(ray_origin, vertices[0]);
+                double u = vector_dot_product(tvec, pvec) * inverse_determinant;
+                if ((u < 0) || (u > 1)) {
+                    //no intersection
+                    continue;
+                }
+
+                //compute v in normal space
+                std::vector<double> qvec = vector_cross_product(tvec, edge1);
+                double v = vector_dot_product(ray_euler, qvec) * inverse_determinant;
+                if ((v < 0) || ((u + v) > 1)) {
+                    //no intersection
+                    continue;
+                }
+
+                //compute t in normal space
+                double t = vector_dot_product(edge2, qvec) * inverse_determinant;
+                if (t < 0) {
+                    //no intersect
+                    continue;
+                }
+
+                //intersect
+
+                //compute depth
+                //double depth = vector_difference(ray_origin, {u,v,t});
+                //cout << "Intersect";
+                
+
+                //... compute intersect data
+                std::vector<double> mp = scalar_multiply(ray_euler, t);
+                std::vector<double> intersection_point = vector_add(mp, ray_origin);
+
+                return intersection_point;
+
+                cout << "Ray_vec: " << ray_euler[0] << " " << ray_euler[1] << " " << ray_euler[2] << endl;
+                cout << "Face: " << face[0] << " " << face[1] << " " << face[2] << endl;
+                cout << "Vertex1: " << vertices[0][0] << " " << vertices[0][1] << " " << vertices[0][2] << endl;
+                cout << "Vertex2: " << vertices[1][0] << " " << vertices[1][1] << " " << vertices[1][2] << endl;
+                cout << "Vertex3: " << vertices[2][0] << " " << vertices[2][1] << " " << vertices[2][2] << endl;
+                cout << "Edge1: " << edge1[0] << " " << edge1[1] << " " << edge1[2] << endl;
+                cout << "Edge2: " << edge2[0] << " " << edge2[1] << " " << edge2[2] << endl;
+                cout << "Normal: " << surface_normal[0] << " " << surface_normal[1] << " " << surface_normal[2] << endl;
+                cout << "Pvec: " << pvec[0] << " " << pvec[1] << " " << pvec[2] << endl;
+                cout << "Determinant: " << determinant << endl;
+            };
+        }
+        return {0,0,0};   
+    }; //recursive?
 
 
 };
@@ -284,6 +561,15 @@ class Render {
 
 //main function
 int main() {
+
+    double t = 17.276;
+    std::vector<double> ray_vec = {-0.174, 0.922, -0.347};
+    
+    std::vector<double> mp = normalize_vector(scalar_multiply(ray_vec, t));
+    cout << "MP: " << mp[0] << " " << mp[1] << " " << mp[2] << endl;
+
+
+
     //create mesh generator
     Procedural_meshes generator;
     
@@ -319,8 +605,23 @@ int main() {
     camera.assign_rays();
 
     //dump to file
-    buffer.output_buffers_to_file("./tmp/out.ppm");
+    buffer.output_buffers_to_file("./tmp/");
 
+
+
+
+    for (double i = 0; i < 60*10; i=i+1.0) {
+                //generate UVs
+        camera.generate_uvs();
+        std::vector<double> rotation_uv_lmfao = {0.5, 0.6};
+        state.camera.vec3D_c_vec = rotation_matrix_degrees(
+            state.camera.vec3D_c_vec, 75.0, rotation_uv_lmfao
+        );
+        camera.assign_rays();
+
+        //dump to file
+        buffer.output_buffers_to_file("./tmp/");
+    }
 
     cout << "exit 1" << flush;
     return 1;
