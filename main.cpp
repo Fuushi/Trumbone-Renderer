@@ -7,6 +7,27 @@
 
 using namespace std;
 
+double get_magnitude(std::vector<double> vec) {
+    return sqrt((vec[0] * vec[0])+(vec[1] * vec[1])+(vec[2] * vec[2]));
+}
+
+std::vector<double> set_magnitude(const std::vector<double>& vec, double target_magnitude) {
+    // Compute the magnitude of the input vector
+    double magnitude = get_magnitude(vec);
+
+    // Create a new vector and normalize its elements
+    std::vector<double> result = vec;
+    result[0] = (result[0] / magnitude) * target_magnitude;
+    result[1] = (result[1] / magnitude) * target_magnitude;
+    result[2] = (result[2] / magnitude) * target_magnitude;
+
+    return result;
+}
+
+std::vector<int> convert_vec_double_to_int(std::vector<double> vec) {
+    return {static_cast<int>(vec[0]), static_cast<int>(vec[1]), static_cast<int>(vec[2])};
+}
+
 //file io declarations
 void saveAsPPM(const std::vector<std::vector<std::vector<int>>>& img, const std::string& filename) {
     // Get dimensions
@@ -49,31 +70,14 @@ void saveAsPPM(const std::vector<std::vector<std::vector<int>>>& img, const std:
     }
 }
 
-void saveAsPPM(const std::vector<std::vector<std::vector<double>>> vec, const std::string filename) {
-    //normalize entire vector array
-    //...determine magnitude range
-    //...map range to 0-255
-    //...multiply each pixels magnitude by fac
-        //scaled_pixel_magnitude = ((origin_magnitude - min) / (max - min)) * 255
-        //new_pixel = scalar_multiply(normalize(pixel), scaled_pixel_magnitude)
-    //...convert to integer
-    
-
-    //create integer array based on normalization
-    //std::vector<std::vector<std::vector<int>>> px_array;
-
-    //call integer overload
-    //saveAsPPM(px_array, filename);
-
-
-    
+void saveAsPPM(const std::vector<std::vector<std::vector<double>>> vec, const std::string filename) {    
 
     //calculate min max magnitudes
     double min = 0.0;
     double max = 0.0;
     for (int x = 0; x < vec.size(); x++) {
         for (int y = 0; y < vec[0].size(); y++) {
-            double magnitude = sqrt((vec[x][y][0] * vec[x][y][0])+(vec[x][y][1] * vec[x][y][1])+(vec[x][y][2] * vec[x][y][2]));
+            double magnitude = get_magnitude(vec[x][y]);
             if (magnitude < min) {
                 min = magnitude;
             };
@@ -88,12 +92,35 @@ void saveAsPPM(const std::vector<std::vector<std::vector<double>>> vec, const st
     //p=color_bit_range
     //r0 = min value
     //r1 = max value
-    //value = (p/(|r0-r1|))*(x-r0)
+    //value = (p/(|r0-r1|))*(x-r0) <<< set magnitude to value
     double p = 255.0;
     double r0=min;
     double r1=max;
+    double value=0;
+    std::vector<std::vector<std::vector<int>>> new_bitmap_array;
 
-    
+    //size bitmap
+    new_bitmap_array.resize(vec.size());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        new_bitmap_array[i].resize(vec[i].size());
+        for (size_t j = 0; j < vec[i].size(); ++j) {
+            new_bitmap_array[i][j].resize(vec[i][j].size());
+        }
+    }
+
+    //assign new values
+    for (int x = 0; x < vec.size(); x++) {
+        for (int y = 0; y < vec[0].size(); y++) {
+            //establish target magnitude by function
+            value = (p/(r0-r1))*(get_magnitude(vec[x][y])-r0);
+
+            //set magnitude by ref
+            new_bitmap_array[x][y] = convert_vec_double_to_int(set_magnitude(vec[x][y], value));
+        }
+    }
+
+    //call origin
+    saveAsPPM(new_bitmap_array, filename);
 };
 
 void saveAsPPM_DEPRECIATED(const std::vector<std::vector<std::vector<double>>>& uvs, const std::string& filename) {
@@ -588,16 +615,6 @@ class Render {
 
                 return intersection_point;
 
-                cout << "Ray_vec: " << ray_euler[0] << " " << ray_euler[1] << " " << ray_euler[2] << endl;
-                cout << "Face: " << face[0] << " " << face[1] << " " << face[2] << endl;
-                cout << "Vertex1: " << vertices[0][0] << " " << vertices[0][1] << " " << vertices[0][2] << endl;
-                cout << "Vertex2: " << vertices[1][0] << " " << vertices[1][1] << " " << vertices[1][2] << endl;
-                cout << "Vertex3: " << vertices[2][0] << " " << vertices[2][1] << " " << vertices[2][2] << endl;
-                cout << "Edge1: " << edge1[0] << " " << edge1[1] << " " << edge1[2] << endl;
-                cout << "Edge2: " << edge2[0] << " " << edge2[1] << " " << edge2[2] << endl;
-                cout << "Normal: " << surface_normal[0] << " " << surface_normal[1] << " " << surface_normal[2] << endl;
-                cout << "Pvec: " << pvec[0] << " " << pvec[1] << " " << pvec[2] << endl;
-                cout << "Determinant: " << determinant << endl;
             };
         }
         return {0,0,0};   
