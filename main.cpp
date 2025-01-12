@@ -48,7 +48,55 @@ void saveAsPPM(const std::vector<std::vector<std::vector<int>>>& img, const std:
         std::cout << "Image saved as " << filename << "\n";
     }
 }
-void saveAsPPM(const std::vector<std::vector<std::vector<double>>>& uvs, const std::string& filename) {
+
+void saveAsPPM(const std::vector<std::vector<std::vector<double>>> vec, const std::string filename) {
+    //normalize entire vector array
+    //...determine magnitude range
+    //...map range to 0-255
+    //...multiply each pixels magnitude by fac
+        //scaled_pixel_magnitude = ((origin_magnitude - min) / (max - min)) * 255
+        //new_pixel = scalar_multiply(normalize(pixel), scaled_pixel_magnitude)
+    //...convert to integer
+    
+
+    //create integer array based on normalization
+    //std::vector<std::vector<std::vector<int>>> px_array;
+
+    //call integer overload
+    //saveAsPPM(px_array, filename);
+
+
+    
+
+    //calculate min max magnitudes
+    double min = 0.0;
+    double max = 0.0;
+    for (int x = 0; x < vec.size(); x++) {
+        for (int y = 0; y < vec[0].size(); y++) {
+            double magnitude = sqrt((vec[x][y][0] * vec[x][y][0])+(vec[x][y][1] * vec[x][y][1])+(vec[x][y][2] * vec[x][y][2]));
+            if (magnitude < min) {
+                min = magnitude;
+            };
+            if (magnitude > max) {
+                max = magnitude;
+            }
+            
+        }
+    };
+
+    //create new array and modulate magnitudes by
+    //p=color_bit_range
+    //r0 = min value
+    //r1 = max value
+    //value = (p/(|r0-r1|))*(x-r0)
+    double p = 255.0;
+    double r0=min;
+    double r1=max;
+
+    
+};
+
+void saveAsPPM_DEPRECIATED(const std::vector<std::vector<std::vector<double>>>& uvs, const std::string& filename) {
     
     //normalize
     
@@ -562,14 +610,6 @@ class Render {
 //main function
 int main() {
 
-    double t = 17.276;
-    std::vector<double> ray_vec = {-0.174, 0.922, -0.347};
-    
-    std::vector<double> mp = normalize_vector(scalar_multiply(ray_vec, t));
-    cout << "MP: " << mp[0] << " " << mp[1] << " " << mp[2] << endl;
-
-
-
     //create mesh generator
     Procedural_meshes generator;
     
@@ -608,7 +648,7 @@ int main() {
     buffer.output_buffers_to_file("./tmp/");
 
 
-
+    return 1;
 
     for (double i = 0; i < 60*10; i=i+1.0) {
                 //generate UVs
