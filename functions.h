@@ -36,9 +36,17 @@ std::vector<double> scalar_multiply(const std::vector<double> vec, double scalar
 //adds 2 double vecs
 std::vector<double> vector_add(const std::vector<double>& vec1, const std::vector<double>& vec2);
 
+//returns the angle between 2 vectors in deg
+double get_vectors_angle(std::vector<double> ray1, std::vector<double> ray2);
+
 //tbh i dont remember what this does but i know it's important
 std::vector<double> matrix_vector_multiplication(
     std::vector<double> vector1,
     const std::vector<std::vector<double>>& matrix
 ); 
+
+//applied rotation matrix based on degrees from centre
+std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, double fov, std::vector<double> uv);
+
+
 #endif // FUNCTIONS_H

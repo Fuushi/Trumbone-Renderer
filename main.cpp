@@ -7,7 +7,8 @@
 
 //functions.h
 #include "functions.h"
-
+#include "rays.h"
+#include "io.h"
 
 using namespace std;
 
@@ -106,46 +107,6 @@ void saveAsPPM(const std::vector<std::vector<std::vector<double>>> vec, const st
     //call origin
     saveAsPPM(new_bitmap_array, filename);
 };
-
-
-
-std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, double fov, std::vector<double> uv) {
-    //applies rotation matrix to a vector according to degrees, uv
-    double theta_z_deg = (uv[0]*fov) - (fov / 2);
-    double theta_x_deg = (uv[1]*fov) - (fov / 2);
-
-    //convert to radians
-    double theta_z_rad = theta_z_deg * (3.14159265358979323846264338327950288419716939937510582097494459230781640628 / 180);
-    double theta_x_rad = theta_x_deg * (3.14159265358979323846264338327950288419716939937510582097494459230781640628 / 180);
-
-    //define z-axis rotation matrix
-    std::vector<std::vector<double>> r_z = {
-        {cos(theta_z_rad), 0.0-sin(theta_z_rad), 0.0},
-        {sin(theta_z_rad), cos(theta_z_rad), 0.0},
-        {0.0, 0.0, 1.0}
-    };
-
-    //define x-axis rotation matrix
-    std::vector<std::vector<double>> r_x = {
-        {1.0, 0.0, 0.0},
-        {0.0, cos(theta_x_rad), 0.0-sin(theta_x_rad)},
-        {0.0, sin(theta_x_rad), cos(theta_x_rad)}
-    };
-
-    //apply matrix(s) via dot product
-    //...
-    std::vector<double> z_corrected_matrix = matrix_vector_multiplication(input_vector, r_z);
-
-    std::vector<double> x_corrected_matrix = matrix_vector_multiplication(z_corrected_matrix, r_x);
-
-    //normalize
-    std::vector<double> normalized_vector = normalize_vector(x_corrected_matrix);
-    
-    return normalized_vector;
-};
-
-
-
 
 
 class Mesh {
@@ -250,17 +211,12 @@ class State {
 
 //Rendering
 //ray struct for passing into function
-struct Ray {
-    //struct contains complex data related to ray intersections
-    std::vector<double> intersect_point = {0.0,0.0,0.0};
-    std::vector<double> surface_normal = {0.0,0.0,0.0};
-    double depth = 0.0;
-};
+
 
 class OutputBuffer {
     public:
     //Creates an output buffer of empty arrays, pass in as reference
-    std::vector<std::vector<std::vector<double>>> rgb_buffer;
+    std::vector<std::vector<std::vector<int>>> rgb_buffer;
     std::vector<std::vector<std::vector<double>>> uvs;
     std::vector<std::vector<std::vector<double>>> ray_euler;
 
@@ -349,17 +305,15 @@ class Render {
                 //use UV value to calculate the ray
                 std::vector<double> ray_euler = rotation_matrix_degrees(cam_euler, state.camera.fov, uv);
 
-                //print ray
-                //std::cout << ray_euler[0] << " " << ray_euler[1] << " " << ray_euler[2] << endl;
-                
-                //cast ray via function call
-
                 //create rgb pixel
                 Ray ray = cast_ray(cam_pos, ray_euler);
 
+                //run pixel shader
+                std::vector<int> pixel = principled_bdsf(ray);
+
                 //assign to buffer
-                buffer.rgb_buffer[x][y] = ray.intersect_point;
-                buffer.ray_euler[x][y] = {ray.depth,ray.depth,ray.depth};
+                buffer.rgb_buffer[x][y] = pixel;
+                buffer.ray_euler[x][y] = {ray.frensel,ray.depth,0.0}; //composite pass
 
 
             };
@@ -458,14 +412,19 @@ class Render {
                 //calculate depth
                 double depth = vector_difference(intersection_point, ray_origin);
 
+                //calculate frensel
+                double frensel_deg = 180.0 - get_vectors_angle(surface_normal, ray_euler);
+
                 //calculate normal
                 //precomputed at surface_normal
 
                 //pack struct
                 Ray ray;
+                ray.intersect=true;
                 ray.intersect_point = intersection_point;
                 ray.surface_normal = surface_normal;
                 ray.depth = depth;
+                ray.frensel = frensel_deg;
 
                 return ray;
 
