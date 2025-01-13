@@ -412,7 +412,10 @@ class State {
 //Rendering
 //ray struct for passing into function
 struct Ray {
-    //DEPRECIATED
+    //struct contains complex data related to ray intersections
+    std::vector<double> intersect_point = {0.0,0.0,0.0};
+    std::vector<double> surface_normal = {0.0,0.0,0.0};
+    double depth = 0.0;
 };
 
 class OutputBuffer {
@@ -513,11 +516,11 @@ class Render {
                 //cast ray via function call
 
                 //create rgb pixel
-                std::vector<double> pixel = cast_ray(cam_pos, ray_euler);
+                Ray ray = cast_ray(cam_pos, ray_euler);
 
                 //assign to buffer
-                buffer.rgb_buffer[x][y] = pixel;
-                buffer.ray_euler[x][y] = ray_euler;
+                buffer.rgb_buffer[x][y] = ray.intersect_point;
+                buffer.ray_euler[x][y] = {ray.depth,ray.depth,ray.depth};
 
 
             };
@@ -526,7 +529,7 @@ class Render {
 
     };
 
-    std::vector<double> cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler) {
+    Ray cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler) {
 
         //define intersects array
         std::vector<std::vector<double>> intersects;
@@ -613,11 +616,24 @@ class Render {
                 std::vector<double> mp = scalar_multiply(ray_euler, t);
                 std::vector<double> intersection_point = vector_add(mp, ray_origin);
 
-                return intersection_point;
+                //calculate depth
+                double depth = vector_difference(intersection_point, ray_origin);
+
+                //calculate normal
+                //precomputed at surface_normal
+
+                //pack struct
+                Ray ray;
+                ray.intersect_point = intersection_point;
+                ray.surface_normal = surface_normal;
+                ray.depth = depth;
+
+                return ray;
 
             };
         }
-        return {0,0,0};   
+        Ray ray; //empty ray
+        return ray;
     }; //recursive?
 
 
