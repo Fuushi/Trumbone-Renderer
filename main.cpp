@@ -8,7 +8,6 @@
 //functions.h
 #include "functions.h"
 #include "rays.h"
-#include "io.h"
 
 using namespace std;
 
