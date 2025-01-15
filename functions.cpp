@@ -86,6 +86,11 @@ std::vector<double> vector_add(const std::vector<double>& vec1, const std::vecto
     return {vec1[0] + vec2[0], vec1[1] + vec2[1], vec1[2] + vec2[2]};
 };
 
+std::vector<double> vector_subtract(const std::vector<double>& vec1, const std::vector<double>& vec2) {
+    return {vec1[0] - vec2[0], vec1[1] - vec2[1], vec1[2] - vec2[2]};
+};
+
+
 double get_vectors_angle(std::vector<double> ray1, std::vector<double> ray2) {
 
     // Compute the dot product of the vectors
@@ -105,7 +110,7 @@ double get_vectors_angle(std::vector<double> ray1, std::vector<double> ray2) {
     double angle_radians = std::acos(cos_theta);
 
     // Convert the angle to degrees
-    double angle_degrees = angle_radians * (180.0 / M_PI);
+    double angle_degrees = angle_radians * (180.0 / 3.1415926535);
 
     return angle_degrees;
 }
@@ -167,5 +172,17 @@ std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, do
 };
 
 
+std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal) {
+    //normalize the vector
+    std::vector<double> normalized_vec = normalize_vector(vec);
+
+    //get the projection?
+    std::vector<double> projection = scalar_multiply(normal, vector_dot_product(vec, normal));
+
+    //calculate reflection
+    std::vector<double> reflection = vector_subtract(vec, scalar_multiply(projection, 2.0));
+
+    return reflection;
+}
 
 

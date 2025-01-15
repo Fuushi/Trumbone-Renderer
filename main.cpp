@@ -250,7 +250,7 @@ class OutputBuffer {
 
     void output_buffers_to_file(string fileName) {
         saveAsPPM(uvs, fileName+"uv.ppm");
-        saveAsPPM(rgb_buffer, fileName+"mask.ppm");
+        saveAsPPM(rgb_buffer, fileName+"int.ppm");
         saveAsPPM(ray_euler, fileName+"vec.ppm");
 
     };
@@ -307,12 +307,10 @@ class Render {
                 //create rgb pixel
                 Ray ray = cast_ray(cam_pos, ray_euler);
 
-                //run pixel shader
-                std::vector<int> pixel = principled_bdsf(ray);
 
                 //assign to buffer
-                buffer.rgb_buffer[x][y] = pixel;
-                buffer.ray_euler[x][y] = {ray.frensel,ray.depth,0.0}; //composite pass
+                buffer.rgb_buffer[x][y] = ray.color;
+                buffer.ray_euler[x][y] = ray.reflection_vec; //composite pass
 
 
             };
@@ -321,7 +319,13 @@ class Render {
 
     };
 
-    Ray cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler) {
+    Ray cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler, int recursion_depth=0) {
+
+        //decide recursion
+        if (recursion_depth > state.camera.max_bounce+1) {
+            Ray ray;
+            return ray;
+        }
 
         //define intersects array
         std::vector<std::vector<double>> intersects;
@@ -417,6 +421,19 @@ class Render {
                 //calculate normal
                 //precomputed at surface_normal
 
+                //calculate reflection
+                std::vector<double> reflection_vector = reflect_vector_normal(ray_euler, surface_normal);
+
+                //cast next bounce
+                double epsilon = 1e-9; //advance ray forward by some epsilon
+                std::vector<double> advanced_ray = vector_add(ray_origin, set_magnitude(reflection_vector, epsilon));
+
+                Ray reflect_ray = cast_ray(
+                    advanced_ray, 
+                    reflection_vector, 
+                    recursion_depth+1
+                );
+
                 //pack struct
                 Ray ray;
                 ray.intersect=true;
@@ -424,6 +441,13 @@ class Render {
                 ray.surface_normal = surface_normal;
                 ray.depth = depth;
                 ray.frensel = frensel_deg;
+                ray.reflection_vec = reflection_vector;
+                ray.reflection_color = reflect_ray.color;
+
+                //shader
+                std::vector<int> pixel = principled_bdsf(ray);
+
+                ray.color = pixel;
 
                 return ray;
 

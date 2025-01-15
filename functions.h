@@ -48,5 +48,6 @@ std::vector<double> matrix_vector_multiplication(
 //applied rotation matrix based on degrees from centre
 std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, double fov, std::vector<double> uv);
 
-
+//reflects a vector along a normal
+std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal);
 #endif // FUNCTIONS_H
