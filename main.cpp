@@ -108,110 +108,6 @@ void saveAsPPM(const std::vector<std::vector<std::vector<double>>> vec, const st
 };
 
 
-class Mesh {
-    public:
-    // Empty mesh, no vertices or faces initially
-    std::vector<std::vector<double>> vertices;
-    std::vector<std::vector<int>> faces;
-
-    void update_mesh(std::vector<std::vector<double>> new_vertices, std::vector<std::vector<int>> new_faces) {
-        vertices = new_vertices;
-        faces = new_faces;
-        return;
-    }
-
-    // Default constructor that initializes an empty mesh
-    Mesh() = default;
-};
-
-//procedural mesh generator, has to be defined after Mesh
-class Procedural_meshes {
-    public:
-    //procedurally generates a planar mesh and assigns it to the Mesh object
-    void plane(Mesh& mesh) {
-        // Define new vertices and faces
-        std::vector<std::vector<double>> newVertices = {
-            {0.0, -6.0, -6.0},
-            {0.0, -6.0, 6.0},
-            {0.0, 6.0, -6.0},
-            {0.0, 6.0, 6.0}
-        };
-
-
-        std::vector<std::vector<int>> newFaces = {
-            {0, 1, 2},//,  // First face
-            {2, 1, 3}   // Second face
-        };
-
-        mesh.update_mesh(newVertices, newFaces);
-        return;
-    }
-};
-
-class Element {
-    public:
-    //Element contains
-    //mesh
-    Mesh mesh;
-    
-
-    //textures
-    //...
-
-    //debug method
-    void inspect() {
-        //for (int i = 0; i < mesh.vertices.size(); i++) {
-        //   cout << "Vertex: " << mesh.vertices[i][0] << " " << mesh.vertices[i][1] << " " << mesh.vertices[1][2] << endl;
-        //};
-
-        std::cout << "Mesh has: " << mesh.vertices.size() << " vertices" << endl;
-        std::cout << "Mesh has: " << mesh.faces.size() << " faces" << endl;
-    };
-
-    //constructor
-    Element(const Mesh& inputMesh) : mesh(inputMesh) {}
-};
-
-//define world class
-class World {
-    public:
-    //world contains an array of elements
-    std::vector<Element> elements;
-
-    //method to add an element to the world
-    void addElement(const Element& element) {
-        elements.push_back(element);
-    }
-
-};
-
-//define camera class
-class Camera {
-    public:
-    //position
-    std::vector<double> vec3D_c_pos = {3.0, -10.0, 0.0};
-    //unit vector
-    std::vector<double> vec3D_c_vec = {0.0, 1.0, 0.0};
-
-    //camera info
-    double fov = 75.0;
-    int max_bounce = 1;
-    int square_res = 1024;
-    std::vector<int> res = {square_res, square_res};
-
-};
-
-//define state class
-class State {
-    public:
-    World world;
-    Camera camera;
-};
-
-//Rendering
-//ray struct for passing into function
-
-
 class OutputBuffer {
     public:
     //Creates an output buffer of empty arrays, pass in as reference
@@ -401,13 +297,6 @@ class Render {
                     continue;
                 }
 
-                //intersect
-
-                //compute depth
-                //double depth = vector_difference(ray_origin, {u,v,t});
-                //cout << "Intersect";
-                
-
                 //... compute intersect data
                 std::vector<double> mp = scalar_multiply(ray_euler, t);
                 std::vector<double> intersection_point = vector_add(mp, ray_origin);
@@ -436,6 +325,8 @@ class Render {
 
                 //pack struct
                 Ray ray;
+                ray.origin = ray_origin;
+                ray.euler = ray_euler;
                 ray.intersect=true;
                 ray.intersect_point = intersection_point;
                 ray.surface_normal = surface_normal;
@@ -445,7 +336,7 @@ class Render {
                 ray.reflection_color = reflect_ray.color;
 
                 //shader
-                std::vector<int> pixel = principled_bdsf(ray);
+                std::vector<int> pixel = principled_bdsf(ray, state.world);
 
                 ray.color = pixel;
 
@@ -489,6 +380,13 @@ int main() {
 
     //inspect element
     state.world.elements[0].inspect();
+
+    //create lights
+    Light light;
+    light.vec={-1.0,-1.0,-1.0};
+
+    //add light to scene
+    state.world.addLight(light);
 
     
     

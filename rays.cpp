@@ -1,4 +1,5 @@
 #include "rays.h"
+#include "functions.h"
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -6,16 +7,41 @@
 using namespace std;
 
 
-std::vector<int> principled_bdsf(Ray ray) {
+
+std::vector<int> ambient_occlusion(Ray ray, World world) {
+    //loop through lights
+        //find angle
+        //math    
+    std::vector<int> sum = {0,0,0};
+    for (int i = 0; i < world.lights.size(); i++) {
+        double angle = get_vectors_angle(ray.surface_normal, world.lights[i].vec);
+        //^ tangent = 0, parallel = 90, away = 180
+
+        sum[0] = sum[0] + static_cast<int>(angle);
+        sum[1] = sum[1] + static_cast<int>(angle);
+        sum[2] = sum[2] + static_cast<int>(angle);
+
+    }
+
+    sum[0] = sum[0] / world.lights.size();
+    sum[1] = sum[1] / world.lights.size();
+    sum[2] = sum[2] / world.lights.size();
+
+    return sum;
+};
+
+std::vector<int> principled_bdsf(Ray ray, World world) {
     //
+    const std::vector<int> material_color = ambient_occlusion(ray, world);
+    const std::vector<int> sky_color = {20,25,20};
     if (!ray.intersect) {
         //no intersect, return sky
-        return {50,20,20};
+        return sky_color;
     }
 
     // no next reflection (maxed out), return material color
     if (ray.reflection_color.empty()) {
-        return {200,200,200};
+        return material_color;
     }
 
     //here we can assume a reflection
@@ -24,9 +50,11 @@ std::vector<int> principled_bdsf(Ray ray) {
 
     //get local color
     if (ray.intersect) {
-        ray.color={200,200,200};
+        //material color
+        ray.color=material_color;
     } else {
-        ray.color = {20,20,20};
+        //sky color
+        ray.color = sky_color;
     }
 
     //new color vector
