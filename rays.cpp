@@ -7,6 +7,9 @@
 using namespace std;
 
 
+std::vector<int> mix_color(std::vector<int> c1, std::vector<int> c2, double fac) {
+    //indev (will raise a warning until implemented)
+};
 
 std::vector<int> ambient_occlusion(Ray ray, World world) {
     //loop through lights
