@@ -224,7 +224,7 @@ class Render {
         }
 
         //define intersects array
-        std::vector<std::vector<double>> intersects;
+        std::vector<Intersect> intersects;
         
 
         //iterate through world assets
@@ -298,53 +298,80 @@ class Render {
                 }
 
                 //... compute intersect data
-                std::vector<double> mp = scalar_multiply(ray_euler, t);
-                std::vector<double> intersection_point = vector_add(mp, ray_origin);
+                std::vector<double> intersection_point = vector_add(
+                    scalar_multiply(ray_euler, t), ray_origin
+                );
 
                 //calculate depth
                 double depth = vector_difference(intersection_point, ray_origin);
 
-                //calculate frensel
-                double frensel_deg = 180.0 - get_vectors_angle(surface_normal, ray_euler);
+                //add intersect to array
+                Intersect intersect;
+                intersect.depth = depth;
+                intersect.intersect_point = intersection_point;
+                intersect.surface_normal = surface_normal; 
 
-                //calculate normal
-                //precomputed at surface_normal
-
-                //calculate reflection
-                std::vector<double> reflection_vector = reflect_vector_normal(ray_euler, surface_normal);
-
-                //cast next bounce
-                double epsilon = 1e-9; //advance ray forward by some epsilon
-                std::vector<double> advanced_ray = vector_add(ray_origin, set_magnitude(reflection_vector, epsilon));
-
-                Ray reflect_ray = cast_ray(
-                    advanced_ray, 
-                    reflection_vector, 
-                    recursion_depth+1
-                );
-
-                //pack struct
-                Ray ray;
-                ray.origin = ray_origin;
-                ray.euler = ray_euler;
-                ray.intersect=true;
-                ray.intersect_point = intersection_point;
-                ray.surface_normal = surface_normal;
-                ray.depth = depth;
-                ray.frensel = frensel_deg;
-                ray.reflection_vec = reflection_vector;
-                ray.reflection_color = reflect_ray.color;
-
-                //shader
-                std::vector<int> pixel = principled_bdsf(ray, state.world);
-
-                ray.color = pixel;
-
-                return ray;
+                intersects.push_back(intersect);
 
             };
         }
-        Ray ray; //empty ray
+
+
+
+        if (intersects.size() == 0) {
+            Ray ray;
+            return ray;
+        }
+        //else
+
+        //select closest intersect
+        // Select the closest intersect
+        Intersect closestIntersect;
+        closestIntersect.depth = std::numeric_limits<double>::max();  // Initialize with max double value
+
+        for (int i = 0; i < intersects.size(); i++) {
+            if (intersects[i].depth < closestIntersect.depth) {  // Check for the closest (smallest depth)
+                closestIntersect = intersects[i];
+            }
+        }
+
+
+        //calculate frensel
+        double frensel_deg = 180.0 - get_vectors_angle(closestIntersect.surface_normal, ray_euler);
+
+        //calculate normal
+        //precomputed at surface_normal
+
+        //calculate reflection
+        std::vector<double> reflection_vector = reflect_vector_normal(ray_euler, closestIntersect.surface_normal);
+
+        //cast next bounce
+        double epsilon = 1e-9; //advance ray forward by some epsilon
+        std::vector<double> advanced_ray = vector_add(ray_origin, set_magnitude(reflection_vector, epsilon));
+
+        Ray reflect_ray = cast_ray(
+            advanced_ray, 
+            reflection_vector, 
+            recursion_depth+1
+        );
+
+        //pack struct
+        Ray ray;
+        ray.origin = ray_origin;
+        ray.euler = ray_euler;
+        ray.intersect=true;
+        ray.intersect_point = closestIntersect.intersect_point;
+        ray.surface_normal = closestIntersect.surface_normal;
+        ray.depth = closestIntersect.depth;
+        ray.frensel = frensel_deg;
+        ray.reflection_vec = reflection_vector;
+        ray.reflection_color = reflect_ray.color;
+
+        //shader
+        std::vector<int> pixel = principled_bdsf(ray, state.world);
+
+        ray.color = pixel;
+
         return ray;
     }; //recursive?
 
@@ -371,12 +398,15 @@ int main() {
     //create first element, (plane)
     Mesh myMesh;
     generator.plane(myMesh);
-    
-    //transfer ownership to Element
     Element element(std::move(myMesh));
-
-    //add Element to the world 
     state.world.addElement(element);
+
+    //create element 2 (cube)
+    Mesh cubeMesh;
+    generator.cube(cubeMesh, 5.0);
+    Element element2(std::move(cubeMesh));
+    state.world.addElement(element2);
+
 
     //inspect element
     state.world.elements[0].inspect();

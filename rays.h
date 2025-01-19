@@ -44,6 +44,38 @@ class Procedural_meshes {
         mesh.update_mesh(newVertices, newFaces);
         return;
     }
+
+    void cube(Mesh& mesh, double size = 1.0) {
+        // Half-size to center the cube at the origin
+        double halfSize = size / 2.0;
+
+        // Define the vertices of the cube
+        std::vector<std::vector<double>> newVertices = {
+            {-halfSize, -halfSize, -halfSize},  // Vertex 0
+            {halfSize, -halfSize, -halfSize},   // Vertex 1
+            {halfSize, halfSize, -halfSize},    // Vertex 2
+            {-halfSize, halfSize, -halfSize},   // Vertex 3
+            {-halfSize, -halfSize, halfSize},   // Vertex 4
+            {halfSize, -halfSize, halfSize},    // Vertex 5
+            {halfSize, halfSize, halfSize},     // Vertex 6
+            {-halfSize, halfSize, halfSize}     // Vertex 7
+        };
+
+        // Define the faces of the cube using the vertices
+        std::vector<std::vector<int>> newFaces = {
+            {0, 1, 2}, {0, 2, 3}, // Front face
+            {4, 5, 6}, {4, 6, 7}, // Back face
+            {0, 1, 5}, {0, 5, 4}, // Bottom face
+            {3, 2, 6}, {3, 6, 7}, // Top face
+            {0, 3, 7}, {0, 7, 4}, // Left face
+            {1, 2, 6}, {1, 6, 5}  // Right face
+        };
+
+        // Update the mesh with the new vertices and faces
+        mesh.update_mesh(newVertices, newFaces);
+        return;
+    }
+
 };
 
 class Element {
@@ -136,6 +168,13 @@ struct Ray {
     std::vector<int> reflection_color;
     std::vector<double> reflection_vec = {0.0,0.0,0.0};
 
+};
+
+struct Intersect {
+    double depth;
+    std::vector<double> intersect_point;
+    std::vector<double> surface_normal;
+    //...
 };
 
 std::vector<int> principled_bdsf(Ray ray, World world);
