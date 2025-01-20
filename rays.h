@@ -177,6 +177,15 @@ struct Intersect {
     //...
 };
 
+struct LightingContribution {
+    bool obstructed;
+    double depth;
+    double brightness;
+    std::vector<double> vec;
+    std::vector<int> color;
+    //...
+};
+
 std::vector<int> principled_bdsf(Ray ray, World world);
 
 #endif

@@ -342,6 +342,8 @@ class Render {
         //calculate normal
         //precomputed at surface_normal
 
+        //compute illumination...
+
         //calculate reflection
         std::vector<double> reflection_vector = reflect_vector_normal(ray_euler, closestIntersect.surface_normal);
 
@@ -412,7 +414,7 @@ int main() {
     state.world.elements[0].inspect();
 
     //create lights
-    Light light;
+    Light light; //(sun)
     light.vec={-1.0,-1.0,-1.0};
 
     //add light to scene

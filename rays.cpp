@@ -12,9 +12,7 @@ std::vector<int> mix_color(std::vector<int> c1, std::vector<int> c2, double fac)
 };
 
 std::vector<int> ambient_occlusion(Ray ray, World world) {
-    //loop through lights
-        //find angle
-        //math    
+    //fast, but inaccurate lighting effect
     std::vector<int> sum = {0,0,0};
     for (int i = 0; i < world.lights.size(); i++) {
         double angle = get_vectors_angle(ray.surface_normal, world.lights[i].vec);
