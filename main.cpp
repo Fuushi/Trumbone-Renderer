@@ -5,10 +5,6 @@
 #include <cmath>
 #include <math.h>
 
-//functions.h
-#include "functions.h"
-#include "rays.h"
-
 using namespace std;
 
 #include "lib.h"
