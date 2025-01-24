@@ -11,11 +11,12 @@
 
 using namespace std;
 
-
+//function to dump bitmap img to disc
 void saveAsPPM(const std::vector<std::vector<std::vector<int>>>& img, const std::string& filename);
+//vector bitmap overflow
 void saveAsPPM(const std::vector<std::vector<std::vector<double>>> vec, const std::string filename);
 
-
+//Object to store bitmap img buffers
 class OutputBuffer {
     public:
     //Creates an output buffer of empty arrays, pass in as reference
@@ -60,6 +61,7 @@ class OutputBuffer {
     };
 };
 
+//Renderer Object
 class Render {
     private:
         State& state;           // Declare member variable
@@ -70,7 +72,7 @@ class Render {
         : state(state), buffer(buffer) { // Initialize members using initializer list
     }
 
-
+    //uv render pass
     void generate_uvs() {
         //
         cout << "Generating UVs" << endl;
@@ -91,6 +93,7 @@ class Render {
 
     };
     
+    //raycasting render pass
     void assign_rays() {
         //get camera
         std::vector<double> cam_pos = state.camera.vec3D_c_pos;
@@ -123,6 +126,13 @@ class Render {
 
     };
 
+    //wrapper to combine render passes into a single call
+    void render() {
+        generate_uvs();
+        assign_rays();
+    };
+
+    //ray cast function call, returns Ray struct
     Ray cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler, int recursion_depth=0) {
 
         //decide recursion
@@ -225,14 +235,12 @@ class Render {
         }
 
 
-
+        // No intersect optimization
         if (intersects.size() == 0) {
             Ray ray;
             return ray;
         }
-        //else
 
-        //select closest intersect
         // Select the closest intersect
         Intersect closestIntersect;
         closestIntersect.depth = std::numeric_limits<double>::max();  // Initialize with max double value
@@ -247,10 +255,7 @@ class Render {
         //calculate frensel
         double frensel_deg = 180.0 - get_vectors_angle(closestIntersect.surface_normal, ray_euler);
 
-        //calculate normal
-        //precomputed at surface_normal
-
-        //compute illumination...
+        //TODO compute illumination...
 
         //calculate reflection
         std::vector<double> reflection_vector = reflect_vector_normal(ray_euler, closestIntersect.surface_normal);
@@ -259,6 +264,7 @@ class Render {
         double epsilon = 1e-9; //advance ray forward by some epsilon
         std::vector<double> advanced_ray = vector_add(ray_origin, set_magnitude(reflection_vector, epsilon));
 
+        //cast reflection ray from intersect
         Ray reflect_ray = cast_ray(
             advanced_ray, 
             reflection_vector, 
@@ -277,13 +283,15 @@ class Render {
         ray.reflection_vec = reflection_vector;
         ray.reflection_color = reflect_ray.color;
 
-        //shader
+        //run material shader
         std::vector<int> pixel = principled_bdsf(ray, state.world);
 
+        //assign color to ray struct
         ray.color = pixel;
 
+        //return
         return ray;
-    }; //recursive?
+    };
 
 
 };

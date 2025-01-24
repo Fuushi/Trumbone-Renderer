@@ -38,10 +38,6 @@ int main() {
     Element element2(std::move(cubeMesh));
     state.world.addElement(element2);
 
-
-    //inspect element
-    state.world.elements[0].inspect();
-
     //create lights
     Light light; //(sun)
     light.vec={-1.0,-1.0,-1.0};
@@ -54,9 +50,8 @@ int main() {
     //begin render process
 
     //generate UVs
-    camera.generate_uvs();
-    camera.assign_rays();
-
+    camera.render();
+    
     //dump to file
     buffer.output_buffers_to_file("./tmp/");
 
