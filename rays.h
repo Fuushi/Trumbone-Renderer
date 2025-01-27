@@ -107,7 +107,7 @@ class Light {
 
     std::string type = "sun";
     double brightness = 1.0;
-    std::vector<double> color = {255.0,255.0,255.0};
+    std::vector<int> color = {255,255,255};
     std::vector<double> vec;
 };
 
@@ -177,6 +177,11 @@ struct Intersect {
     //...
 };
 
+struct FastRay {
+    bool intersect;
+    double depth;
+};
+
 struct LightingContribution {
     bool obstructed;
     double depth;
@@ -186,6 +191,10 @@ struct LightingContribution {
     //...
 };
 
-std::vector<int> principled_bdsf(Ray ray, World world);
+struct Lux {
+    std::vector<LightingContribution> lighting_contributions;
+};
+
+std::vector<int> principled_bdsf(Ray ray, Lux lux, World world);
 
 #endif

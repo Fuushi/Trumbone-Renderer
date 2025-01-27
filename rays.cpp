@@ -31,8 +31,33 @@ std::vector<int> ambient_occlusion(Ray ray, World world) {
     return sum;
 };
 
-std::vector<int> principled_bdsf(Ray ray, World world) {
+std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
     //
+
+    //calculate lux sum
+    double sum = 0;
+    for (int i = 0; i < lux.lighting_contributions.size(); i++) {
+        //dropoff function
+
+        //e^-x
+        //double influence = pow(2.71828182, 0-lux.lighting_contributions[i].depth);
+        //because type is sun, influence is always 1, split logit with if
+        double influence = 1;
+
+        //multiply brightness by influence to get lux at point
+        //inrelation to n light
+        if (!lux.lighting_contributions[i].obstructed) {
+            sum = sum + (lux.lighting_contributions[i].brightness*influence);
+        }
+        
+
+    };
+
+    int int_sum = static_cast<int>(sum);
+    return {int_sum,int_sum,int_sum};
+
+
+    // disabled for debug
     const std::vector<int> material_color = ambient_occlusion(ray, world);
     const std::vector<int> sky_color = {20,25,20};
     if (!ray.intersect) {

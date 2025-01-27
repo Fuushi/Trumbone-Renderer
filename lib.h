@@ -132,6 +132,105 @@ class Render {
         assign_rays();
     };
 
+    FastRay fast_ray_cast(std::vector<double> origin, std::vector<double> vec) {
+        //so long as i never have to touch this code again, it is maintainable
+        //returns first detected intersect
+        //iterate through meshes
+        for (int i = 0; i < state.world.elements.size(); i++) {
+            Element element = state.world.elements[i];
+            std::vector<int> face;
+            std::vector<std::vector<double>> vertices;
+            //iterate through faces
+            for (int j = 0; j < element.mesh.faces.size(); j++) {
+
+                face = element.mesh.faces[j]; //extract mesh data
+                vertices = {element.mesh.vertices[face[0]],element.mesh.vertices[face[1]],element.mesh.vertices[face[2]]};
+
+                //define edges
+                std::vector<double> edge1 = matrix_subration(vertices[1], vertices[0]); //v2-v1
+                std::vector<double> edge2 = matrix_subration(vertices[2], vertices[0]); //v3-v1
+
+                //math... elaborated in slow function
+                std::vector<double> pvec = vector_cross_product(vec, edge2);
+                double determinant = vector_dot_product(edge1, pvec);
+                if (determinant == 0) {continue;}; //ray parrallel optimization
+                double inverse_determinant =  1 / determinant;
+                std::vector<double> tvec = matrix_subration(origin, vertices[0]);
+                double u = vector_dot_product(tvec, pvec) * inverse_determinant;
+                if ((u < 0) || (u > 1)) {continue;}
+                std::vector<double> qvec = vector_cross_product(tvec, edge1);
+                double v = vector_dot_product(vec, qvec) * inverse_determinant;
+                if ((v < 0) || ((u + v) > 1)) {continue;}
+                double t = vector_dot_product(edge2, qvec) * inverse_determinant;
+                if (t < 0) {continue;}
+                //compute intersection
+                std::vector<double> intersection_point = vector_add(scalar_multiply(vec, t), origin);
+
+                //calculate depth
+                double depth = vector_difference(intersection_point, origin);
+                FastRay ray;
+                ray.intersect=true;
+                ray.depth=depth;
+                return ray;
+            };
+        };
+        //no intersects
+        FastRay ray;
+        ray.intersect=false;
+        ray.depth=-1.0;
+        return ray;
+    };
+
+    LightingContribution cast_light_ray(Light light, std::vector<double> ray_origin, std::vector<double> ray_vec) {
+        //calculate ray
+        FastRay light_ray = fast_ray_cast(ray_origin, ray_vec);
+
+        //initialize return object
+        LightingContribution contribution;
+
+        //pass in ray attributes
+        contribution.obstructed = light_ray.intersect;
+        contribution.depth = light_ray.depth;
+
+        //pass in light object attributes
+        contribution.brightness = light.brightness;
+        contribution.vec = light.vec;
+        contribution.color = light.color;
+
+        //return LightingContribution object
+        return contribution;
+    };
+
+    Lux calculate_luminance(std::vector<double> origin) {
+        //...
+        std::vector<LightingContribution> lighting_contributions;
+        for (int i = 0; i < state.world.lights.size(); i++) {
+            //
+
+            //light vector is inverted with scalar multiply
+            std::vector<double> inverse_vector = scalar_multiply(state.world.lights[i].vec, -1.0);
+
+            //advance ray by epsilon
+            double epsilon = 1e-9; //advance ray forward by some epsilon
+            std::vector<double> advanced_ray = vector_add(origin, set_magnitude(inverse_vector, epsilon));
+
+            //compute lighting
+            lighting_contributions.push_back(
+                cast_light_ray(
+                    state.world.lights[i], advanced_ray, inverse_vector
+            ));
+        };
+
+        // create stuct and assign array by reference
+        Lux lux;
+        lux.lighting_contributions=lighting_contributions;
+
+        //return struct
+        return lux;
+    };
+
+
+
     //ray cast function call, returns Ray struct
     Ray cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler, int recursion_depth=0) {
 
@@ -256,6 +355,7 @@ class Render {
         double frensel_deg = 180.0 - get_vectors_angle(closestIntersect.surface_normal, ray_euler);
 
         //TODO compute illumination...
+        Lux lux = calculate_luminance(closestIntersect.intersect_point);
 
         //calculate reflection
         std::vector<double> reflection_vector = reflect_vector_normal(ray_euler, closestIntersect.surface_normal);
@@ -284,7 +384,7 @@ class Render {
         ray.reflection_color = reflect_ray.color;
 
         //run material shader
-        std::vector<int> pixel = principled_bdsf(ray, state.world);
+        std::vector<int> pixel = principled_bdsf(ray, lux, state.world);
 
         //assign color to ray struct
         ray.color = pixel;

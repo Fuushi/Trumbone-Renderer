@@ -40,6 +40,7 @@ int main() {
 
     //create lights
     Light light; //(sun)
+    light.brightness=128;
     light.vec={-1.0,-1.0,-1.0};
 
     //add light to scene
