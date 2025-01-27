@@ -45,7 +45,7 @@ int main() {
     Light light; //(sun)
     light.brightness=128;
     light.vec={-1.0,-1.0,-1.0};
-    light.color={255,0,0};
+    //light.color={255,0,0};
 
     //add light to scene
     state.world.addLight(light);
@@ -54,7 +54,7 @@ int main() {
     Light light2; //(Madara: "What about the second one?")
     light2.brightness=128;
     light2.vec={-1.0,-1.0,-2.0};
-    light2.color={0,0,255};
+    //light2.color={0,0,255};
 
     //add light to scene
     state.world.addLight(light2);

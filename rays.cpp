@@ -34,29 +34,40 @@ std::vector<int> ambient_occlusion(Ray ray, World world) {
 std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
     //
 
-    //calculate lux sum
+    //Lux sums by color channel
     std::vector<double> sums = {0,0,0};
     for (int i = 0; i < lux.lighting_contributions.size(); i++) {
         //dropoff function
 
-        //e^-x
-        //double influence = pow(2.71828182, 0-lux.lighting_contributions[i].depth);
-        //because type is sun, influence is always 1, split logit with if
+        //e^-x or 1
+        //multiply by brightness to get Lux
+        //for point source: pow(2.71828182, 0-lux.lighting_contributions[i].depth);
+        //for sun: 1
         double influence = 1;
 
-        //multiply brightness by influence to get lux at point
-        //inrelation to n light
-        if (!lux.lighting_contributions[i].obstructed) {
-            //sum = sum + (lux.lighting_contributions[i].brightness*influence);
-            sums[0] = sums[0] + lux.lighting_contributions[i].color[0] * ((lux.lighting_contributions[i].brightness*influence) / 255);
-            sums[1] = sums[1] + lux.lighting_contributions[i].color[1] * ((lux.lighting_contributions[i].brightness*influence) / 255);
-            sums[2] = sums[2] + lux.lighting_contributions[i].color[2] * ((lux.lighting_contributions[i].brightness*influence) / 255);
+        
+
+        //static cast color to double and normalize
+        //multiply channel by Lux to get color Lux
+        std::vector<double> color = set_magnitude(convert_vec_int_to_double(lux.lighting_contributions[i].color), 1.0);
+        if (lux.lighting_contributions[i].obstructed) {
+            continue;
         }
         
+        // sum += color * brightness(lumine) * influence
+        sums[0] = sums[0] + color[0] * ((lux.lighting_contributions[i].brightness*influence));
+        sums[1] = sums[1] + color[1] * ((lux.lighting_contributions[i].brightness*influence));
+        sums[2] = sums[2] + color[2] * ((lux.lighting_contributions[i].brightness*influence));
+        
+        
     };
+    //max function for alphas
+    for (int i=0; i<sums.size(); i++) {sums[i]=min(sums[i],255.0);};
 
-    return {static_cast<int>(sums[0]),static_cast<int>(sums[1]),static_cast<int>(sums[2])};
-
+    //static cast (returns Lux values) (dynamic range fixed for int canvas (0-255 Lux))
+    return {
+        convert_vec_double_to_int(sums)
+    };
 
     // disabled for debug
     const std::vector<int> material_color = ambient_occlusion(ray, world);

@@ -4,6 +4,9 @@
 std::vector<int> convert_vec_double_to_int(std::vector<double> vec) {
     return {static_cast<int>(vec[0]), static_cast<int>(vec[1]), static_cast<int>(vec[2])};
 };
+std::vector<double> convert_vec_int_to_double(std::vector<int> vec) {
+    return {static_cast<double>(vec[0]), static_cast<double>(vec[1]), static_cast<double>(vec[2])};
+};
 
 double get_magnitude(std::vector<double> vec) {
     return sqrt((vec[0] * vec[0]) + (vec[1] * vec[1]) + (vec[2] * vec[2]));
