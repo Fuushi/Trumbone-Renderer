@@ -18,6 +18,9 @@ int main() {
     
     //create state object
     State state;
+    
+    //configure render options
+    state.camera.max_bounce=1;
 
     //initialize buffer
     OutputBuffer buffer;
@@ -42,9 +45,20 @@ int main() {
     Light light; //(sun)
     light.brightness=128;
     light.vec={-1.0,-1.0,-1.0};
+    light.color={255,0,0};
 
     //add light to scene
     state.world.addLight(light);
+
+
+    Light light2; //(Madara: "What about the second one?")
+    light2.brightness=128;
+    light2.vec={-1.0,-1.0,-2.0};
+    light2.color={0,0,255};
+
+    //add light to scene
+    state.world.addLight(light2);
+
 
     
     
@@ -56,8 +70,8 @@ int main() {
     //dump to file
     buffer.output_buffers_to_file("./tmp/");
 
+    return 1; //disables animation player
 
-    return 1;
 
     for (double i = 0; i < 60*10; i=i+1.0) {
                 //generate UVs

@@ -35,7 +35,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
     //
 
     //calculate lux sum
-    double sum = 0;
+    std::vector<double> sums = {0,0,0};
     for (int i = 0; i < lux.lighting_contributions.size(); i++) {
         //dropoff function
 
@@ -47,14 +47,15 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
         //multiply brightness by influence to get lux at point
         //inrelation to n light
         if (!lux.lighting_contributions[i].obstructed) {
-            sum = sum + (lux.lighting_contributions[i].brightness*influence);
+            //sum = sum + (lux.lighting_contributions[i].brightness*influence);
+            sums[0] = sums[0] + lux.lighting_contributions[i].color[0] * ((lux.lighting_contributions[i].brightness*influence) / 255);
+            sums[1] = sums[1] + lux.lighting_contributions[i].color[1] * ((lux.lighting_contributions[i].brightness*influence) / 255);
+            sums[2] = sums[2] + lux.lighting_contributions[i].color[2] * ((lux.lighting_contributions[i].brightness*influence) / 255);
         }
         
-
     };
 
-    int int_sum = static_cast<int>(sum);
-    return {int_sum,int_sum,int_sum};
+    return {static_cast<int>(sums[0]),static_cast<int>(sums[1]),static_cast<int>(sums[2])};
 
 
     // disabled for debug
