@@ -45,6 +45,40 @@ class Procedural_meshes {
         return;
     }
 
+    void neutral_surface(Mesh& mesh) {
+        std::vector<std::vector<double>> vertices = {
+            {-1, -1, 0},
+            {-1, 1, 0},
+            {1, -1, 0},
+            {1, 1, 0},
+
+        };
+
+        std::vector<std::vector<int>> faces = {
+            {0, 1, 2},//,  // First face
+            {2, 1, 3}   // Second face
+        };
+
+        mesh.update_mesh(vertices, faces);
+        return;
+    }
+
+    void neutral_surface_rotated(Mesh& mesh) {
+        std::vector<std::vector<double>> vertices {
+            {-1, 0, -1},
+            {-1, 0, 1},
+            {1, 0, -1},
+            {1, 0, 1}
+        };
+
+        std::vector<std::vector<int>> faces = {
+            {0, 1, 2},//,  // First face
+            {2, 1, 3}   // Second face
+        };
+        mesh.update_mesh(vertices, faces);
+        return;
+    }
+
     void cube(Mesh& mesh, double size = 1.0) {
         // Half-size to center the cube at the origin
         double halfSize = size / 2.0;
@@ -83,6 +117,11 @@ class Element {
     //Element contains
     //mesh
     Mesh mesh;
+
+    //object data
+    std::vector<double> pos = {0,0,0};
+
+    //update mesh based on pos
     
 
     //textures
@@ -162,7 +201,7 @@ struct Ray {
     bool intersect = false; //not implemented
     double depth = 0.0;
     double frensel = 0.0;
-    std::vector<int> color = {20,20,20};
+    std::vector<int> color = {20,25,20}; //20,25,20
     std::vector<double> intersect_point = {0.0,0.0,0.0};
     std::vector<double> surface_normal = {0.0,0.0,0.0};
     std::vector<int> reflection_color;

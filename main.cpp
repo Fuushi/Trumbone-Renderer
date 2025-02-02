@@ -20,7 +20,7 @@ int main() {
     State state;
     
     //configure render options
-    state.camera.max_bounce=1;
+    state.camera.max_bounce=0;
 
     //initialize buffer
     OutputBuffer buffer;
@@ -42,21 +42,18 @@ int main() {
     state.world.addElement(element2);
 
     //create lights
+    //:1
     Light light; //(sun)
-    light.brightness=128;
+    light.brightness=1;
     light.vec={-1.0,-1.0,-1.0};
-    //light.color={255,0,0};
-
-    //add light to scene
+    light.color={255,200,200};
     state.world.addLight(light);
 
-
-    Light light2; //(Madara: "What about the second one?")
-    light2.brightness=128;
+    //L2
+    Light light2;               //(Madara: "Oh? You Calculated Luminance for my light source?")
+    light2.brightness=1;        //(Madara: "What about the second one?")
     light2.vec={-1.0,-1.0,-2.0};
-    //light2.color={0,0,255};
-
-    //add light to scene
+    light2.color={200,200,255};
     state.world.addLight(light2);
 
 
@@ -70,9 +67,8 @@ int main() {
     //dump to file
     buffer.output_buffers_to_file("./tmp/");
 
-    return 1; //disables animation player
-
-
+    //animator
+    /*
     for (double i = 0; i < 60*10; i=i+1.0) {
                 //generate UVs
         camera.generate_uvs();
@@ -88,4 +84,5 @@ int main() {
 
     cout << "exit 1" << flush;
     return 1;
+    */
 }

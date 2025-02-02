@@ -9,6 +9,8 @@ using namespace std;
 std::vector<int> convert_vec_double_to_int(std::vector<double> vec);
 std::vector<double> convert_vec_int_to_double(std::vector<int> vec);
 
+void print_v(std::vector<double> vec);
+
 //gets magnitude from a double vector
 double get_magnitude(std::vector<double> vec);
 
@@ -36,6 +38,9 @@ std::vector<double> scalar_multiply(const std::vector<double> vec, double scalar
 
 //adds 2 double vecs
 std::vector<double> vector_add(const std::vector<double>& vec1, const std::vector<double>& vec2);
+
+//multiplies 2 vecs
+std::vector<double> vector_multiply(std::vector<double> vec1, std::vector<double> vec2);
 
 //returns the angle between 2 vectors in deg
 double get_vectors_angle(std::vector<double> ray1, std::vector<double> ray2);

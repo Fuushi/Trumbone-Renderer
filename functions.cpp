@@ -1,5 +1,10 @@
 #include "functions.h"
 #include <cmath>  // Required for sqrt
+#include <iostream>
+
+void print_v(std::vector<double> vec) {
+    std::cout  << vec[0] << " " << vec[1] << " " << vec[2] << endl;
+}
 
 std::vector<int> convert_vec_double_to_int(std::vector<double> vec) {
     return {static_cast<int>(vec[0]), static_cast<int>(vec[1]), static_cast<int>(vec[2])};
@@ -92,6 +97,12 @@ std::vector<double> vector_add(const std::vector<double>& vec1, const std::vecto
 std::vector<double> vector_subtract(const std::vector<double>& vec1, const std::vector<double>& vec2) {
     return {vec1[0] - vec2[0], vec1[1] - vec2[1], vec1[2] - vec2[2]};
 };
+
+std::vector<double> vector_multiply(std::vector<double> vec1, std::vector<double> vec2) {
+    return {
+        vec1[0]*vec2[0], vec1[1]*vec2[1], vec1[2]*vec2[2]
+    };
+}
 
 
 double get_vectors_angle(std::vector<double> ray1, std::vector<double> ray2) {

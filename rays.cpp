@@ -64,22 +64,26 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
     //max function for alphas
     for (int i=0; i<sums.size(); i++) {sums[i]=min(sums[i],255.0);};
 
-    //static cast (returns Lux values) (dynamic range fixed for int canvas (0-255 Lux))
-    return {
-        convert_vec_double_to_int(sums)
-    };
+    //define material colors
+    std::vector<int> material_color = {128,128,128};
 
-    // disabled for debug
-    const std::vector<int> material_color = ambient_occlusion(ray, world);
-    const std::vector<int> sky_color = {20,25,20};
+    //local color after illuminance
+    std::vector<int> local_color = convert_vec_double_to_int(
+        vector_multiply(
+            convert_vec_int_to_double(material_color),
+            sums
+        )
+    );
+
+    const std::vector<int> sky_color = {80,90,80}; //20,25,20
     if (!ray.intersect) {
         //no intersect, return sky
         return sky_color;
     }
 
-    // no next reflection (maxed out), return material color
+    // no next reflection (maxed out), return local color
     if (ray.reflection_color.empty()) {
-        return material_color;
+        return local_color; //return local color
     }
 
     //here we can assume a reflection
@@ -89,7 +93,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
     //get local color
     if (ray.intersect) {
         //material color
-        ray.color=material_color;
+        ray.color=local_color;
     } else {
         //sky color
         ray.color = sky_color;

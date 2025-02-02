@@ -21,6 +21,7 @@ class OutputBuffer {
     public:
     //Creates an output buffer of empty arrays, pass in as reference
     std::vector<std::vector<std::vector<int>>> rgb_buffer;
+    std::vector<std::vector<std::vector<int>>> int_array_2;
     std::vector<std::vector<std::vector<double>>> uvs;
     std::vector<std::vector<std::vector<double>>> ray_euler;
 
@@ -43,6 +44,14 @@ class OutputBuffer {
                 cell.resize(2); // Each cell is a vector with 2 doubles
             }
         }
+        
+        int_array_2.resize(res[0]);
+        for (auto& row : int_array_2) {
+            row.resize(res[1]);
+            for (auto& cell : row) {
+                cell.resize(2); // Each cell is a vector with 2 doubles
+            }
+        }
 
         ray_euler.resize(res[0]);
         for (auto& row : ray_euler) {
@@ -55,8 +64,9 @@ class OutputBuffer {
 
     void output_buffers_to_file(string fileName) {
         saveAsPPM(uvs, fileName+"uv.ppm");
-        saveAsPPM(rgb_buffer, fileName+"int.ppm");
+        saveAsPPM(rgb_buffer, fileName+"composite.ppm");
         saveAsPPM(ray_euler, fileName+"vec.ppm");
+        saveAsPPM(int_array_2, fileName+"int_array_2.ppm");
 
     };
 };
@@ -117,8 +127,14 @@ class Render {
 
                 //assign to buffer
                 buffer.rgb_buffer[x][y] = ray.color;
-                buffer.ray_euler[x][y] = ray.reflection_vec; //composite pass
+                buffer.ray_euler[x][y] = ray.reflection_vec;
 
+                //
+                if (!ray.reflection_color.empty()) {
+                    buffer.int_array_2[x][y] = ray.reflection_color;
+                } else {
+                    buffer.int_array_2[x][y] = {80,90,80}; //sky color
+                }
 
             };
         };
@@ -260,9 +276,9 @@ class Render {
 
                 //extract vertices
                 vertices = {
-                    element.mesh.vertices[face[0]],
-                    element.mesh.vertices[face[1]],
-                    element.mesh.vertices[face[2]]
+                    vector_add(element.mesh.vertices[face[0]], element.pos),
+                    vector_add(element.mesh.vertices[face[1]], element.pos),
+                    vector_add(element.mesh.vertices[face[2]], element.pos)
                 };
 
                 //define edges
@@ -271,7 +287,7 @@ class Render {
 
                 //compute normal of the 2 edges
                 //... (cross(e1,e2))
-                std::vector<double> surface_normal = vector_cross_product(edge1, edge2);
+                std::vector<double> surface_normal = normalize_vector(vector_cross_product(edge1, edge2));
 
                 //compute determinant of edge 1 and 2
                 //...
@@ -334,9 +350,10 @@ class Render {
         }
 
 
-        // No intersect optimization
+        // No intersect optimization (skips shader and goes straight to sky to save performance)
         if (intersects.size() == 0) {
             Ray ray;
+            ray.color = {80,90,80}; //sky color
             return ray;
         }
 
@@ -362,7 +379,9 @@ class Render {
 
         //cast next bounce
         double epsilon = 1e-9; //advance ray forward by some epsilon
-        std::vector<double> advanced_ray = vector_add(ray_origin, set_magnitude(reflection_vector, epsilon));
+        std::vector<double> advanced_ray = vector_add(
+            closestIntersect.intersect_point, 
+            set_magnitude(reflection_vector, epsilon));
 
         //cast reflection ray from intersect
         Ray reflect_ray = cast_ray(
