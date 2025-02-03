@@ -2,8 +2,19 @@
 #include <cmath>  // Required for sqrt
 #include <iostream>
 
-void print_v(std::vector<double> vec) {
-    std::cout  << vec[0] << " " << vec[1] << " " << vec[2] << endl;
+#include <iostream>
+#include <vector>
+
+void print_v(const std::vector<double> vec) {
+    std::cout << vec[0] << " " << vec[1] << " " << vec[2] << std::endl;
+}
+
+void print_v(const std::vector<float> vec) {
+    print_v(std::vector<double>(vec.begin(), vec.end()));  // Convert properly
+}
+
+void print_v(const std::vector<int> vec) {
+    print_v(std::vector<double>(vec.begin(), vec.end()));  // Convert properly
 }
 
 std::vector<int> convert_vec_double_to_int(std::vector<double> vec) {

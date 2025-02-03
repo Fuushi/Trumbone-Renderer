@@ -10,6 +10,8 @@ std::vector<int> convert_vec_double_to_int(std::vector<double> vec);
 std::vector<double> convert_vec_int_to_double(std::vector<int> vec);
 
 void print_v(std::vector<double> vec);
+void print_V(std::vector<float> vec);
+void print_v(std::vector<int> vec);
 
 //gets magnitude from a double vector
 double get_magnitude(std::vector<double> vec);

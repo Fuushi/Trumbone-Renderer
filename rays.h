@@ -154,6 +154,11 @@ class Light {
 //define world class
 class World {
     public:
+
+    //world contains global render properties
+    std::vector<int> sky_color = {50,50,60};
+
+
     //world contains an array of elements
     std::vector<Element> elements;
     std::vector<Light> lights;

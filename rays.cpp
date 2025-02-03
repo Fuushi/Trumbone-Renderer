@@ -75,7 +75,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
         )
     );
 
-    const std::vector<int> sky_color = {80,90,80}; //20,25,20
+    const std::vector<int> sky_color = world.sky_color; //20,25,20
     if (!ray.intersect) {
         //no intersect, return sky
         return sky_color;

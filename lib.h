@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <limits>
 
 //functions.h
 #include "functions.h"
@@ -133,7 +134,7 @@ class Render {
                 if (!ray.reflection_color.empty()) {
                     buffer.int_array_2[x][y] = ray.reflection_color;
                 } else {
-                    buffer.int_array_2[x][y] = {80,90,80}; //sky color
+                    buffer.int_array_2[x][y] = state.world.sky_color; //sky color
                 }
 
             };
@@ -285,12 +286,8 @@ class Render {
                 std::vector<double> edge1 = matrix_subration(vertices[1], vertices[0]); //v2-v1
                 std::vector<double> edge2 = matrix_subration(vertices[2], vertices[0]); //v3-v1
 
-                //compute normal of the 2 edges
-                //... (cross(e1,e2))
+                //compute normal of the 2 edges (cross(e1,e2))
                 std::vector<double> surface_normal = normalize_vector(vector_cross_product(edge1, edge2));
-
-                //compute determinant of edge 1 and 2
-                //...
 
                 //pvec = cross(ray_vec, e2)
                 std::vector<double> pvec = vector_cross_product(ray_euler, edge2);
@@ -353,7 +350,7 @@ class Render {
         // No intersect optimization (skips shader and goes straight to sky to save performance)
         if (intersects.size() == 0) {
             Ray ray;
-            ray.color = {80,90,80}; //sky color
+            ray.color = state.world.sky_color; //sky color
             return ray;
         }
 
