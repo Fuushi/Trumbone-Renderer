@@ -65,12 +65,13 @@ int main() {
 
     // Add a light to the scene
     Light light;
-    light.vec = {-1.0, -1.0, -1.0};
+    light.brightness=1;
+    light.vec={-1.0,-1.0,-1.0};
+    light.color={255,255,255};
     state.world.addLight(light);
 
     // Begin rendering
-    camera.generate_uvs();
-    camera.assign_rays();
+    camera.render();
 
     // Save the output to files
     buffer.output_buffers_to_file("./tmp/");
