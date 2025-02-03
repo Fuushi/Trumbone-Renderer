@@ -6,9 +6,18 @@
 
 using namespace std;
 
+int linear_interpolation(int a, int b, double fac) {
+    int num = static_cast<int>((1-fac) * static_cast<double>(a) + fac * static_cast<double>(b));
+    return num;
+};
 
 std::vector<int> mix_color(std::vector<int> c1, std::vector<int> c2, double fac) {
     //indev (will raise a warning until implemented)
+    return std::vector<int> {
+        linear_interpolation(c1[0], c2[0], fac),
+        linear_interpolation(c1[1], c2[1], fac),
+        linear_interpolation(c1[2], c2[2], fac),
+    };
 };
 
 std::vector<int> ambient_occlusion(Ray ray, World world) {
@@ -100,10 +109,13 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
     }
 
     //new color vector
+    //include frensel factoring here by calling mix color
     std::vector<int> color = {0,0,0};
-    color[0] = (ray.color[0] + ray.reflection_color[0]) / 2;
-    color[1] = (ray.color[1] + ray.reflection_color[1]) / 2;
-    color[2] = (ray.color[2] + ray.reflection_color[2]) / 2;
+    //color[0] = (ray.color[0] + ray.reflection_color[0]) / 2;
+    //color[1] = (ray.color[1] + ray.reflection_color[1]) / 2;
+    //color[2] = (ray.color[2] + ray.reflection_color[2]) / 2;
+
+    color = mix_color(ray.color, ray.reflection_color, ray.frensel/180);
 
     //return new color
     return color;
