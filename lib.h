@@ -265,7 +265,7 @@ class Render {
         for (int i = 0; i < state.world.elements.size(); i++) {
             
             //get asset elements
-            Element element = state.world.elements[i];
+            Element& element = state.world.elements[i];
 
             //iterate through faces
             std::vector<int> face;
@@ -336,7 +336,7 @@ class Render {
                 double depth = vector_difference(intersection_point, ray_origin);
 
                 //add intersect to array
-                Intersect intersect;
+                Intersect intersect(element);
                 intersect.depth = depth;
                 intersect.intersect_point = intersection_point;
                 intersect.surface_normal = surface_normal; 
@@ -355,14 +355,18 @@ class Render {
         }
 
         // Select the closest intersect
-        Intersect closestIntersect;
-        closestIntersect.depth = std::numeric_limits<double>::max();  // Initialize with max double value
+        int closestIndex = -1;  // Initialize with an invalid index
+        float closestDepth = std::numeric_limits<float>::max();  // Use the maximum possible depth initially
 
         for (int i = 0; i < intersects.size(); i++) {
-            if (intersects[i].depth < closestIntersect.depth) {  // Check for the closest (smallest depth)
-                closestIntersect = intersects[i];
+            if (intersects[i].depth < closestDepth) {  // Check for the closest (smallest depth)
+                closestDepth = intersects[i].depth;
+                closestIndex = i;
             }
         }
+
+        //assign the reference to the closest intersect to a variable
+        Intersect& closestIntersect = intersects[closestIndex];
 
 
         //calculate frensel
@@ -399,8 +403,11 @@ class Render {
         ray.reflection_vec = reflection_vector;
         ray.reflection_color = reflect_ray.color;
 
+        //based on hit object, get shader inputs (inherit from object)
+        ShaderInputs& shaderInputs = closestIntersect.target.shaderInputs;
+
         //run material shader
-        std::vector<int> pixel = principled_bdsf(ray, lux, state.world);
+        std::vector<int> pixel = principled_bdsf(ray, lux, state.world, shaderInputs);
 
         //assign color to ray struct
         ray.color = pixel;

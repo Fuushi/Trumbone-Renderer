@@ -40,7 +40,7 @@ std::vector<int> ambient_occlusion(Ray ray, World world) {
     return sum;
 };
 
-std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
+std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs shader_inputs) {
     //
 
     //Lux sums by color channel
@@ -54,7 +54,6 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
         //for sun: 1
         double influence = 1;
 
-        
 
         //static cast color to double and normalize
         //multiply channel by Lux to get color Lux
@@ -73,8 +72,8 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
     //max function for alphas
     for (int i=0; i<sums.size(); i++) {sums[i]=min(sums[i],255.0);};
 
-    //define material colors
-    std::vector<int> material_color = {128,128,128};
+    //define material colors from inputs
+    std::vector<int> material_color = shader_inputs.material_color;
 
     //local color after illuminance
     std::vector<int> local_color = convert_vec_double_to_int(
@@ -97,7 +96,6 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
 
     //here we can assume a reflection
     //blend between material color (depth) and reflect by frensel
-    //TODO factor in frensel (just averaged for now)
 
     //get local color
     if (ray.intersect) {
@@ -109,12 +107,9 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world) {
     }
 
     //new color vector
-    //include frensel factoring here by calling mix color
     std::vector<int> color = {0,0,0};
-    //color[0] = (ray.color[0] + ray.reflection_color[0]) / 2;
-    //color[1] = (ray.color[1] + ray.reflection_color[1]) / 2;
-    //color[2] = (ray.color[2] + ray.reflection_color[2]) / 2;
 
+    //mix colors by frensel fac
     color = mix_color(ray.color, ray.reflection_color, ray.frensel/180);
 
     //return new color

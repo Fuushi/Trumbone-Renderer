@@ -33,16 +33,21 @@ int main() {
     Mesh myMesh;
     generator.plane(myMesh);
     Element element(std::move(myMesh));
+    element.shaderInputs.material_color={255,0,0};
+    element.shaderInputs.objectID=1;
     state.world.addElement(element);
 
     //create element 2 (cube)
     Mesh cubeMesh;
     generator.cube(cubeMesh, 5.0);
     Element element2(std::move(cubeMesh));
+    element2.shaderInputs.material_color={0,0,255};
+    element.shaderInputs.objectID=2;
     state.world.addElement(element2);
 
+
     //create lights
-    //:1
+    //L1
     Light light; //(sun)
     light.brightness=1;
     light.vec={-1.0,-1.0,-1.0};
@@ -57,8 +62,6 @@ int main() {
     state.world.addLight(light2);
 
 
-    
-    
     //begin render process
 
     //generate UVs

@@ -6,6 +6,11 @@
 
 using namespace std;
 
+struct ShaderInputs {
+    int objectID = 0;
+    std::vector<int> material_color = {128,128,128};
+};
+
 class Mesh {
     public:
     // Empty mesh, no vertices or faces initially
@@ -114,9 +119,10 @@ class Procedural_meshes {
 
 class Element {
     public:
-    //Element contains
-    //mesh
+    //Element Container
     Mesh mesh;
+    ShaderInputs shaderInputs;
+
 
     //object data
     std::vector<double> pos = {0,0,0};
@@ -218,7 +224,11 @@ struct Intersect {
     double depth;
     std::vector<double> intersect_point;
     std::vector<double> surface_normal;
+
+    Element& target; //MUST be initialized
     //...
+    // Constructor to initialize the reference
+    Intersect(Element& element) : target(element) {}
 };
 
 struct FastRay {
@@ -239,6 +249,6 @@ struct Lux {
     std::vector<LightingContribution> lighting_contributions;
 };
 
-std::vector<int> principled_bdsf(Ray ray, Lux lux, World world);
+std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs shader_inputs);
 
 #endif
