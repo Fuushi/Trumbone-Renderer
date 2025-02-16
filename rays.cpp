@@ -11,6 +11,12 @@ int linear_interpolation(int a, int b, double fac) {
     return num;
 };
 
+double limit_range(double num, double min, double max) {
+    num = std::max(num, min);
+    num = std::min(num, max);
+    return num;
+}
+
 std::vector<int> mix_color(std::vector<int> c1, std::vector<int> c2, double fac) {
     //indev (will raise a warning until implemented)
     return std::vector<int> {
@@ -110,7 +116,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
     std::vector<int> color = {0,0,0};
 
     //mix colors by frensel fac
-    color = mix_color(ray.color, ray.reflection_color, ray.frensel/180);
+    color = mix_color(ray.color, ray.reflection_color, limit_range(ray.frensel/180+shader_inputs.gloss_diffuse_mix_fac, 0, 1));
 
     //return new color
     return color;

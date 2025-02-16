@@ -63,14 +63,18 @@ class OutputBuffer {
         }
     };
 
-    void output_buffers_to_file(string fileName) {
-        saveAsPPM(uvs, fileName+"uv.ppm");
+    void output_buffers_to_file(string fileName, bool do_meta_passes=true) {
         saveAsPPM(rgb_buffer, fileName+"composite.ppm");
+        if (!do_meta_passes) {return;};
+
+        saveAsPPM(uvs, fileName+"uv.ppm");
         saveAsPPM(ray_euler, fileName+"vec.ppm");
         saveAsPPM(int_array_2, fileName+"int_array_2.ppm");
 
     };
 };
+
+class Animator;
 
 //Renderer Object
 class Render {
@@ -82,6 +86,8 @@ class Render {
     Render(State& state, OutputBuffer& buffer) 
         : state(state), buffer(buffer) { // Initialize members using initializer list
     }
+    
+    friend class Animator;  // Grant full access to Animator
 
     //uv render pass
     void generate_uvs() {
@@ -417,6 +423,82 @@ class Render {
     };
 
 
+};
+
+
+
+struct Pin {
+    std::vector<double>& target;
+    std::vector<double> value1;
+    std::vector<double> value2;
+    int f1;
+    int f2;
+
+    int interpolatorFlag;
+
+    // Constructor
+    Pin(std::vector<double>& target, 
+        const std::vector<double>& value1, 
+        const std::vector<double>& value2, 
+        int f1, int f2, 
+        int interpolatorFlag)
+        : target(target), value1(value1), value2(value2), f1(f1), f2(f2), interpolatorFlag(interpolatorFlag) {}
+};
+
+
+class Animator {
+    private:
+    Render& render;  // Store reference to Render
+
+    int step = 0; //private step counter
+
+    void updateAnimations() {
+        //update render state based on Pins
+        for (int i = 0; i < pins.size(); i++) {
+            //update animation and assign to reference
+            std::vector<double> cache = vector_interpolate(
+                pins[i].value1,
+                pins[i].value2,
+                static_cast<double>(step) / static_cast<double>(pins[i].f2), //TODO correctly calculate
+                pins[i].interpolatorFlag
+            );
+
+            pins[i].target[0] = cache[0];
+            pins[i].target[1] = cache[1];
+            pins[i].target[2] = cache[2];
+        };
+    };
+
+    public:
+    // Constructor that takes a reference to Render
+    Animator(Render& render) : render(render) {}
+
+    //public variables
+    int steps = 240;
+
+    std::vector<Pin> pins={};
+
+    //method declarations
+    void addPin(Pin& pin) {
+        pins.push_back(pin);
+    };
+    
+    void RenderFrames(){
+        for (int i = 0; i < steps; i++) {
+            //apply animation Pins
+            updateAnimations();
+
+            //render frame
+            render.render();
+
+            //output buffers to file
+            render.buffer.output_buffers_to_file("./tmp/f"+std::to_string(i)+".ppm", false);
+            
+            //complete frame
+            step++;
+            std::cout << "Rendered Frame: " << i << endl;
+        }
+    };
 };
 
 #endif

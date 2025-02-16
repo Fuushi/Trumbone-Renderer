@@ -208,6 +208,17 @@ std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<d
     std::vector<double> reflection = vector_subtract(vec, scalar_multiply(projection, 2.0));
 
     return reflection;
+};
+
+double linearInterpolate(double a, double b, double t) {
+    return (1.0 - t) * a + t * b;
 }
 
+std::vector<double> vector_interpolate(std::vector<double> v1, std::vector<double> v2, double t, int flag) {
+    return {
+        linearInterpolate(v1[0],v2[0],t),
+        linearInterpolate(v1[1],v2[1],t),
+        linearInterpolate(v1[2],v2[2],t)
+    };
+};
 

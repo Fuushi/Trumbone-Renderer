@@ -8,6 +8,7 @@ using namespace std;
 
 struct ShaderInputs {
     int objectID = 0;
+    double gloss_diffuse_mix_fac = 0; //0 for neutral (frensel)
     std::vector<int> material_color = {128,128,128};
 };
 
@@ -194,7 +195,6 @@ class Camera {
     int max_bounce = 1;
     int square_res = 1024;
     std::vector<int> res = {square_res, square_res};
-
 };
 
 //define state class
