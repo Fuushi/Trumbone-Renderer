@@ -24,7 +24,7 @@ int main() {
     //state.camera.vec3D_c_pos = {3, 10, 0};
     
     //configure render options
-    state.camera.res={512,512};
+    state.camera.res={800,800};
     state.camera.max_bounce=0;
 
     //initialize buffer
@@ -35,19 +35,19 @@ int main() {
     Render camera(state, buffer);
 
     //create first element, (plane)
-    Mesh myMesh;
-    generator.plane(myMesh);
-    Element element(std::move(myMesh));
+    //Mesh myMesh;
+    //generator.plane(myMesh);
+    //Element element(std::move(myMesh));
     //element.shaderInputs.material_color={255,0,0};
-    element.shaderInputs.objectID=1;
-    state.world.addElement(element);
+    //element.shaderInputs.objectID=1;
+    //state.world.addElement(element);
 
     //create element 2 (cube)
     Mesh cubeMesh;
-    generator.cube(cubeMesh, 5.0);
+    generator.cube(cubeMesh, 2.0);
     Element element2(std::move(cubeMesh));
     //element2.shaderInputs.material_color={0,0,255};
-    element.shaderInputs.objectID=2;
+    element2.shaderInputs.objectID=2;
     state.world.addElement(element2);
 
 
@@ -104,8 +104,8 @@ int main() {
     //create Pin for camera pos
     Pin c_pin(
         state.camera.vec3D_c_vec,
+        {1.0, 0.0, 0.0},
         {0.0, 1.0, 0.0},
-        {0.0, 0.0, 1.0},
         0,
         60,
         0
@@ -113,8 +113,8 @@ int main() {
 
     Pin p_pin(
         state.camera.vec3D_c_pos,
-        {3.0, -10.0, 0.0},
-        {3.0, 0, -10.0},
+        {-10.0, 0.0, 0.0},
+        {0.0, -10.0, 0.0},
         0,
         60,
         0

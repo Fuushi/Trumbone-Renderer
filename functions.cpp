@@ -160,42 +160,60 @@ std::vector<double> matrix_vector_multiplication(
     return result;
 };
 
+// Rodrigues' rotation formula: Rotates `v` around axis `u` by `theta` radians
+std::vector<double> rotate_vector(const std::vector<double>& v, const std::vector<double>& u, double theta) {
+    double cos_theta = std::cos(theta);
+    double sin_theta = std::sin(theta);
+    double dot = v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
+
+    return {
+        v[0] * cos_theta + (u[1] * v[2] - u[2] * v[1]) * sin_theta + u[0] * dot * (1 - cos_theta),
+        v[1] * cos_theta + (u[2] * v[0] - u[0] * v[2]) * sin_theta + u[1] * dot * (1 - cos_theta),
+        v[2] * cos_theta + (u[0] * v[1] - u[1] * v[0]) * sin_theta + u[2] * dot * (1 - cos_theta)
+    };
+}
 
 std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, double fov, std::vector<double> uv) {
-    //applies rotation matrix to a vector according to degrees, uv
-    double theta_z_deg = (uv[0]*fov) - (fov / 2);
-    double theta_x_deg = (uv[1]*fov) - (fov / 2);
+    // Compute horizontal (z-axis) rotation angle
 
-    //convert to radians
-    double theta_z_rad = theta_z_deg * (3.14159265358979323846264338327950288419716939937510582097494459230781640628 / 180);
-    double theta_x_rad = theta_x_deg * (3.14159265358979323846264338327950288419716939937510582097494459230781640628 / 180);
+    //remap coordinates
+    std::vector<double> uv2 = {uv[1],1-uv[0]};
 
-    //define z-axis rotation matrix
+    double theta_z_deg = (uv2[0] * fov) - (fov / 2);
+    double theta_z_rad = theta_z_deg * (3.141592 / 180.0);
+
+    // Define z-axis rotation matrix
     std::vector<std::vector<double>> r_z = {
-        {cos(theta_z_rad), 0.0-sin(theta_z_rad), 0.0},
+        {cos(theta_z_rad), -sin(theta_z_rad), 0.0},
         {sin(theta_z_rad), cos(theta_z_rad), 0.0},
         {0.0, 0.0, 1.0}
     };
 
-    //define x-axis rotation matrix
-    std::vector<std::vector<double>> r_x = {
-        {1.0, 0.0, 0.0},
-        {0.0, cos(theta_x_rad), 0.0-sin(theta_x_rad)},
-        {0.0, sin(theta_x_rad), cos(theta_x_rad)}
-    };
-
-    //apply matrix(s) via dot product
-    //...
+    // Apply z-axis rotation first
     std::vector<double> z_corrected_matrix = matrix_vector_multiplication(input_vector, r_z);
 
-    std::vector<double> x_corrected_matrix = matrix_vector_multiplication(z_corrected_matrix, r_x);
+    // Compute rotation axis (perpendicular to the vector and z-axis)
+    std::vector<double> z_axis = {0.0, 0.0, 1.0};
+    std::vector<double> rotation_axis = vector_cross_product(z_corrected_matrix, z_axis);
 
-    //normalize
-    std::vector<double> normalized_vector = normalize_vector(x_corrected_matrix);
-    
-    return normalized_vector;
-};
+    // Handle edge case where vector is perfectly aligned with z (avoid zero vector)
+    if (rotation_axis[0] == 0 && rotation_axis[1] == 0 && rotation_axis[2] == 0) {
+        rotation_axis = {1.0, 0.0, 0.0};  // Choose arbitrary perpendicular axis
+    }
 
+    // Normalize the rotation axis
+    rotation_axis = normalize_vector(rotation_axis);
+
+    // Compute up/down rotation angle
+    double theta_up_deg = (uv2[1] * fov) - (fov / 2);
+    double theta_up_rad = theta_up_deg * (3.141592 / 180.0);
+
+    // Apply rotation using Rodrigues' formula
+    std::vector<double> rotated_vector = rotate_vector(z_corrected_matrix, rotation_axis, theta_up_rad);
+
+    // Normalize the final vector
+    return normalize_vector(rotated_vector);
+}
 
 std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal) {
     //normalize the vector
