@@ -24,7 +24,7 @@ int main() {
     //state.camera.vec3D_c_pos = {3, 10, 0};
     
     //configure render options
-    state.camera.res={800,800};
+    state.camera.res={512,512};
     state.camera.max_bounce=0;
 
     //initialize buffer
@@ -107,7 +107,7 @@ int main() {
         {1.0, 0.0, 0.0},
         {0.0, 1.0, 0.0},
         0,
-        60,
+        30,
         0
     );
 
@@ -116,12 +116,32 @@ int main() {
         {-10.0, 0.0, 0.0},
         {0.0, -10.0, 0.0},
         0,
+        30,
+        0
+    );
+
+    Pin c_pin2(
+        state.camera.vec3D_c_vec,
+        {0.0, 1.0, 0.0},
+        {0.0, 0.0, -1.0},
+        30,
+        60,
+        0
+    );
+
+    Pin p_pin2(
+        state.camera.vec3D_c_pos,
+        {0.0, -10.0, 0.0},
+        {0.0, 0.0, 10.0},
+        30,
         60,
         0
     );
 
     animator.addPin(c_pin);
     animator.addPin(p_pin);
+    animator.addPin(c_pin2);
+    animator.addPin(p_pin2);
 
     animator.RenderFrames();
 

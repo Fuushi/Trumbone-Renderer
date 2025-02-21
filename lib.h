@@ -456,17 +456,32 @@ class Animator {
         //update render state based on Pins
         for (int i = 0; i < pins.size(); i++) {
             //update animation and assign to reference
+            double t = (
+                static_cast<double>(step) / 
+                abs(static_cast<double>(pins[i].f2) - static_cast<double>(pins[i].f1)
+            ) - 
+            (
+                static_cast<double>(pins[i].f1) / 
+                abs(static_cast<double>(pins[i].f2) - static_cast<double>(pins[i].f1))
+            ));
+            
+            //static_cast<double>(step) / static_cast<double>(pins[i].f2)
             std::vector<double> cache = vector_interpolate(
                 pins[i].value1,
                 pins[i].value2,
-                static_cast<double>(step) / static_cast<double>(pins[i].f2), //TODO correctly calculate
+                t, //TODO correctly calculate
                 pins[i].interpolatorFlag
             );
 
-            pins[i].target[0] = cache[0];
-            pins[i].target[1] = cache[1];
-            pins[i].target[2] = cache[2];
+            //if pin is active apply animation
+            if (pin_interpolator_range_checker(t, pins[i].interpolatorFlag)) {
+                pins[i].target[0] = cache[0];
+                pins[i].target[1] = cache[1];
+                pins[i].target[2] = cache[2];
+            };
+
         };
+
     };
 
     public:

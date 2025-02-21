@@ -59,9 +59,11 @@ std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, do
 //reflects a vector along a normal
 std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal);
 
-
-
 //animator functions
 double linearInterpolate(double a, double b, double t);
+
 std::vector<double> vector_interpolate(std::vector<double> v1, std::vector<double> v2, double t, int flag);
+
+bool pin_interpolator_range_checker(double t, int flag);
+
 #endif // FUNCTIONS_H
