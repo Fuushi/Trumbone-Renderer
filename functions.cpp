@@ -5,6 +5,12 @@
 #include <iostream>
 #include <vector>
 
+struct Orthogonol {
+    std::vector<double> Forward;
+    std::vector<double> Right;
+    std::vector<double> Up;
+};
+
 void print_v(const std::vector<double> vec) {
     std::cout << vec[0] << " " << vec[1] << " " << vec[2] << std::endl;
 }
@@ -123,6 +129,22 @@ std::vector<double> vector_multiply(std::vector<double> vec1, std::vector<double
     };
 }
 
+Orthogonol get_orthogonol(std::vector<double> vec) {
+    //get the orthoganol vector from a base vector making assumptions
+
+    // rotate 90 degrees to the right
+    std::vector<double> right = normalize_vector({vec[1], -vec[0], 0});
+
+    //up is the cross product
+    std::vector<double> up = vector_cross_product(vec, right);
+     
+    Orthogonol orthogonol;
+    orthogonol.Forward=vec;
+    orthogonol.Right=right;
+    orthogonol.Up=up;
+    return orthogonol;
+};
+
 
 double get_vectors_angle(std::vector<double> ray1, std::vector<double> ray2) {
 
@@ -196,6 +218,33 @@ double get_z_rotation_rad(std::vector<double> vec) {
     return angle_radians;
 };
 
+//get vertical angle along Right
+// Function to calculate the up/down angle in radians
+double getUpDownAngleRadians(const Orthogonol& ortho) {
+    // Extract Y and Z components of the Up vector
+    double Ay = ortho.Up[1];
+    double Az = ortho.Up[2];
+
+    // Calculate angle in radians using atan2 for correct quadrant
+    double angleRadians = std::atan2(Ay, -Az);
+
+    return angleRadians;
+}
+
+// Rodrigues' rotation formula: Rotates `v` around axis `u` by `theta` radians
+std::vector<double> rodriques_formaula(const std::vector<double>& v, const std::vector<double>& rotation_axis, double rad) {
+    
+    double cos_theta = std::cos(rad);
+    double sin_theta = std::sin(rad);
+    double dot = v[0] * rotation_axis[0] + v[1] * rotation_axis[1] + v[2] * rotation_axis[2];
+
+    return {
+        v[0] * cos_theta + (rotation_axis[1] * v[2] - rotation_axis[2] * v[1]) * sin_theta + rotation_axis[0] * dot * (1 - cos_theta),
+        v[1] * cos_theta + (rotation_axis[2] * v[0] - rotation_axis[0] * v[2]) * sin_theta + rotation_axis[1] * dot * (1 - cos_theta),
+        v[2] * cos_theta + (rotation_axis[0] * v[1] - rotation_axis[1] * v[0]) * sin_theta + rotation_axis[2] * dot * (1 - cos_theta)
+    };
+}
+
 std::vector<double> calculate_ray_heading(std::vector<double> input_vector, double fov, std::vector<double> uv) {
     // Calculate the heading of the ray in world space given
     //  -camera vector (world space)
@@ -226,10 +275,17 @@ std::vector<double> calculate_ray_heading(std::vector<double> input_vector, doub
     // rotate along the Z
     std::vector<double> z_rotated_matrix = rotate_vector_z(cam_space, rad_z_delta);
 
+    //get orthogonol vector
+    Orthogonol orth = get_orthogonol(input_vector);
+    
+    //use ortho to get rotation angle
+    double vertical_angle_rad = getUpDownAngleRadians(orth);
+    
     //rotate along the orthoganal right of the camera
+    std::vector<double> u_corrected_matrix = rodriques_formaula(z_rotated_matrix, orth.Right, vertical_angle_rad);
 
     //return world space
-    return z_rotated_matrix;
+    return normalize_vector(u_corrected_matrix);
 };
 
 std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal) {
