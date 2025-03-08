@@ -17,6 +17,14 @@ void print_v(const std::vector<int> vec) {
     print_v(std::vector<double>(vec.begin(), vec.end()));  // Convert properly
 }
 
+double deg_to_rad(double deg) {
+    return deg * (3.1415692 / 180);
+};
+
+double rad_to_deg(double rad) {
+    return rad * (180 / 3.141592);
+};
+
 std::vector<int> convert_vec_double_to_int(std::vector<double> vec) {
     return {static_cast<int>(vec[0]), static_cast<int>(vec[1]), static_cast<int>(vec[2])};
 };
@@ -140,7 +148,6 @@ double get_vectors_angle(std::vector<double> ray1, std::vector<double> ray2) {
     return angle_degrees;
 }
 
-
 std::vector<double> matrix_vector_multiplication(
     std::vector<double> vector1,
     const std::vector<std::vector<double>>& matrix) 
@@ -160,31 +167,6 @@ std::vector<double> matrix_vector_multiplication(
     return result;
 };
 
-// Rodrigues' rotation formula: Rotates `v` around axis `u` by `theta` radians
-std::vector<double> rotate_vector_u(const std::vector<double>& v, double theta) {
-    // Compute rotation axis (perpendicular to the vector and z-axis)
-    std::vector<double> z_axis = {0.0, 0.0, 1.0};
-    std::vector<double> rotation_axis = vector_cross_product(v, z_axis);
-
-    // Handle edge case where vector is perfectly aligned with z (avoid zero vector)
-    if (rotation_axis[0] == 0 && rotation_axis[1] == 0 && rotation_axis[2] == 0) {
-        rotation_axis = {1.0, 0.0, 0.0};  // Choose arbitrary perpendicular axis
-    }
-
-    // Normalize the rotation axis
-    rotation_axis = normalize_vector(rotation_axis);
-    
-    double cos_theta = std::cos(theta);
-    double sin_theta = std::sin(theta);
-    double dot = v[0] * rotation_axis[0] + v[1] * rotation_axis[1] + v[2] * rotation_axis[2];
-
-    return {
-        v[0] * cos_theta + (rotation_axis[1] * v[2] - rotation_axis[2] * v[1]) * sin_theta + rotation_axis[0] * dot * (1 - cos_theta),
-        v[1] * cos_theta + (rotation_axis[2] * v[0] - rotation_axis[0] * v[2]) * sin_theta + rotation_axis[1] * dot * (1 - cos_theta),
-        v[2] * cos_theta + (rotation_axis[0] * v[1] - rotation_axis[1] * v[0]) * sin_theta + rotation_axis[2] * dot * (1 - cos_theta)
-    };
-}
-
 std::vector<double> rotate_vector_z(std::vector<double> vec, double rotation_rad) {
     
     // Define z-axis rotation matrix
@@ -195,40 +177,59 @@ std::vector<double> rotate_vector_z(std::vector<double> vec, double rotation_rad
     };
 
     // Apply z-axis rotation first
-    std::vector<double> z_corrected_matrix = matrix_vector_multiplication(vec, r_z);
+    std::vector<double> z_corrected_matrix = normalize_vector(matrix_vector_multiplication(vec, r_z));
 
     return z_corrected_matrix;
 };
 
-std::vector<double> rotate_vector_wrapper(std::vector<double> vec, double z_rad, double u_rad) {
-    std::vector<double> z_corrected_matrix = rotate_vector_z(vec, z_rad);
-    std::vector<double> rotated_vector = rotate_vector_u(z_corrected_matrix, u_rad);
-    return rotated_vector;
+double get_z_rotation_rad(std::vector<double> vec) {
+    //declare fwd
+    std::vector<double> Fwd = {1,0,0};
+
+    //eliminate the z and normalize
+    vec[2]=0;
+    vec = normalize_vector(vec);
+
+    //calculate angle
+    double angle_radians = std::atan2(vec[1], vec[0]);  // atan2 gives angle from X+ axis
+
+    return angle_radians;
 };
 
-std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, double fov, std::vector<double> uv) {
-    // Compute horizontal (z-axis) rotation angle
+std::vector<double> calculate_ray_heading(std::vector<double> input_vector, double fov, std::vector<double> uv) {
+    // Calculate the heading of the ray in world space given
+    //  -camera vector (world space)
+    //  -uv (converted to camera normalized device coordinates)
+    //  -fov (ignored for now)
 
-    //remap coordinates
-    std::vector<double> uv2 = {uv[1],1-uv[0]};
+    //convert uv2 to NDC (normalized device coordinates)
+    // changes range from [0,-1] to [-1,1]
+    std::vector<double> ndc = {
+        (2*uv[1]) - 1,
+        (2*(1-uv[0])) - 1
+    };
 
-    //calculate z rotation from UV
-    double theta_z_deg = (uv2[0] * fov) - (fov / 2);
-    double theta_z_rad = theta_z_deg * (3.141592 / 180.0);
-
-    //calculate u rotation from UV
-    double theta_up_deg = (uv2[1] * fov) - (fov / 2);
-    double theta_up_rad = theta_up_deg * (3.141592 / 180.0);
-
-    // Apply rotation using Rodrigues' formula
-    std::vector<double> rotated_vector = rotate_vector_wrapper(
-        input_vector,
-        theta_z_rad,
-        theta_up_rad
+    //calculate ray heading in camera space (cam space is looking to the x+)
+    std::vector<double> cam_space = normalize_vector(
+        {
+            1, ndc[0], ndc[1]
+        }
     );
+
+    //convert cam space to world space
+    //...
+
+    //establish rad deltas
+    double rad_z_delta = get_z_rotation_rad(input_vector);
     
-    // Normalize the final vector
-    return normalize_vector(rotated_vector);
+
+    // rotate along the Z
+    std::vector<double> z_rotated_matrix = rotate_vector_z(cam_space, rad_z_delta);
+
+    //rotate along the orthoganal right of the camera
+
+    //return world space
+    return z_rotated_matrix;
 };
 
 std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal) {

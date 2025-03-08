@@ -126,7 +126,7 @@ class Render {
                 std::vector<double> uv = {uv_x, uv_y};
 
                 //use UV value to calculate the ray
-                std::vector<double> ray_euler = rotation_matrix_degrees(cam_euler, state.camera.fov, uv);
+                std::vector<double> ray_euler = calculate_ray_heading(cam_euler, state.camera.fov, uv);
 
                 //create rgb pixel
                 Ray ray = cast_ray(cam_pos, ray_euler);

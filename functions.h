@@ -10,8 +10,12 @@ std::vector<int> convert_vec_double_to_int(std::vector<double> vec);
 std::vector<double> convert_vec_int_to_double(std::vector<int> vec);
 
 void print_v(std::vector<double> vec);
-void print_V(std::vector<float> vec);
+void print_v(std::vector<float> vec);
 void print_v(std::vector<int> vec);
+
+//converts degrees to radians & visca versa
+double deg_to_rad(double deg);
+double rad_to_deg(double rad);
 
 //gets magnitude from a double vector
 double get_magnitude(std::vector<double> vec);
@@ -54,7 +58,7 @@ std::vector<double> matrix_vector_multiplication(
 ); 
 
 //applied rotation matrix based on degrees from centre
-std::vector<double> rotation_matrix_degrees(std::vector<double> input_vector, double fov, std::vector<double> uv);
+std::vector<double> calculate_ray_heading(std::vector<double> input_vector, double fov, std::vector<double> uv);
 
 //reflects a vector along a normal
 std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal);

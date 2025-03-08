@@ -116,7 +116,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
     std::vector<int> color = {0,0,0};
 
     //mix colors by frensel fac
-    color = mix_color(ray.color, ray.reflection_color, limit_range(ray.frensel/180+shader_inputs.gloss_diffuse_mix_fac, 0, 1));
+    color = mix_color(ray.reflection_color, ray.color, limit_range(ray.frensel/180+shader_inputs.gloss_diffuse_mix_fac, 0, 1));
 
     //return new color
     return color;

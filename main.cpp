@@ -24,7 +24,7 @@ int main() {
     //state.camera.vec3D_c_pos = {3, 10, 0};
     
     //configure render options
-    state.camera.res={512,512};
+    state.camera.res={128,128};
     state.camera.max_bounce=0;
 
     //initialize buffer
@@ -43,20 +43,20 @@ int main() {
     //state.world.addElement(element);
 
     //create element 2 (cube)
-    Mesh cubeMesh;
-    generator.cube(cubeMesh, 2.0);
-    Element element2(std::move(cubeMesh));
-    //element2.shaderInputs.material_color={0,0,255};
-    element2.shaderInputs.objectID=2;
-    state.world.addElement(element2);
-
-
-
+    /*
+    Mesh cubeMesh0;
+    generator.cube(cubeMesh0, 1.0);
+    Element element_0(std::move(cubeMesh0));
+    element_0.shaderInputs.objectID=1;
+    element_0.shaderInputs.material_color={255,0,0};
+    element_0.pos={0,0,0};
+    state.world.addElement(element_0);
+    */
 
 
     //create debug elements
     Mesh cubeMesh2;
-    generator.cube(cubeMesh2, 0.5);
+    generator.cube(cubeMesh2, 1);
     Element element_x(std::move(cubeMesh2));
     element_x.shaderInputs.objectID=3;
     element_x.shaderInputs.material_color={255,0,0};
@@ -64,7 +64,7 @@ int main() {
     state.world.addElement(element_x);
 
     Mesh cubeMesh3;
-    generator.cube(cubeMesh3, 0.5);
+    generator.cube(cubeMesh3, 1);
     Element element_y(std::move(cubeMesh3));
     element_y.shaderInputs.objectID=4;
     element_y.shaderInputs.material_color={0,255,0};
@@ -72,7 +72,7 @@ int main() {
     state.world.addElement(element_y);
 
     Mesh cubeMesh4;
-    generator.cube(cubeMesh4, 0.5);
+    generator.cube(cubeMesh4, 1);
     Element element_z(std::move(cubeMesh4));
     element_z.shaderInputs.objectID=5;
     element_z.shaderInputs.material_color={0,0,255};
