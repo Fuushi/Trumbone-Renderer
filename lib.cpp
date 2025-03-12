@@ -7,6 +7,7 @@
 
 //functions.h
 #include "functions.h"
+#include "mathHelper.h"
 #include "rays.h"
 
 

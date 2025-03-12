@@ -1,5 +1,6 @@
 #include "rays.h"
 #include "functions.h"
+#include "mathHelper.h"
 #include <cmath>
 #include <vector>
 #include <iostream>

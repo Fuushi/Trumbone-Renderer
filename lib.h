@@ -9,6 +9,7 @@
 //functions.h
 #include "functions.h"
 #include "rays.h"
+#include "mathHelper.h"
 
 using namespace std;
 
@@ -170,15 +171,15 @@ class Render {
                 vertices = {element.mesh.vertices[face[0]],element.mesh.vertices[face[1]],element.mesh.vertices[face[2]]};
 
                 //define edges
-                std::vector<double> edge1 = matrix_subration(vertices[1], vertices[0]); //v2-v1
-                std::vector<double> edge2 = matrix_subration(vertices[2], vertices[0]); //v3-v1
+                std::vector<double> edge1 = vector_subtract(vertices[1], vertices[0]); //v2-v1
+                std::vector<double> edge2 = vector_subtract(vertices[2], vertices[0]); //v3-v1
 
                 //math... elaborated in slow function
                 std::vector<double> pvec = vector_cross_product(vec, edge2);
                 double determinant = vector_dot_product(edge1, pvec);
                 if (determinant == 0) {continue;}; //ray parrallel optimization
                 double inverse_determinant =  1 / determinant;
-                std::vector<double> tvec = matrix_subration(origin, vertices[0]);
+                std::vector<double> tvec = vector_subtract(origin, vertices[0]);
                 double u = vector_dot_product(tvec, pvec) * inverse_determinant;
                 if ((u < 0) || (u > 1)) {continue;}
                 std::vector<double> qvec = vector_cross_product(tvec, edge1);
@@ -289,8 +290,8 @@ class Render {
                 };
 
                 //define edges
-                std::vector<double> edge1 = matrix_subration(vertices[1], vertices[0]); //v2-v1
-                std::vector<double> edge2 = matrix_subration(vertices[2], vertices[0]); //v3-v1
+                std::vector<double> edge1 = vector_subtract(vertices[1], vertices[0]); //v2-v1
+                std::vector<double> edge2 = vector_subtract(vertices[2], vertices[0]); //v3-v1
 
                 //compute normal of the 2 edges (cross(e1,e2))
                 std::vector<double> surface_normal = normalize_vector(vector_cross_product(edge1, edge2));
@@ -311,7 +312,7 @@ class Render {
                 double inverse_determinant =  1 / determinant;
 
                 //compute u in normal space
-                std::vector<double> tvec = matrix_subration(ray_origin, vertices[0]);
+                std::vector<double> tvec = vector_subtract(ray_origin, vertices[0]);
                 double u = vector_dot_product(tvec, pvec) * inverse_determinant;
                 if ((u < 0) || (u > 1)) {
                     //no intersection
