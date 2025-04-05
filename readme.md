@@ -2,6 +2,8 @@
 
 A proof-of-concept C++ library for raytracing and rendering scenes with elements, lights, and a camera system. Designed as a portfolio project, this library demonstrates fundamental concepts of raytracing and scene management.
 
+![Trumbone Renderer Example](https://cdn.kindling.me/pub.php?id=ex1.jpeg)
+
 ## Features
 
 - **Scene Management**: Add and inspect elements (meshes) and lights in a 3D scene.
