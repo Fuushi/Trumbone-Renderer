@@ -44,9 +44,9 @@ Orthogonol get_orthogonol(const Vec3D& vec) {
 
     //convert to legacy vectors before packing to orthogonol
     Orthogonol orthogonol;
-    orthogonol.Forward=vec.to_double();
-    orthogonol.Right=right.to_double();
-    orthogonol.Up=up.to_double();
+    orthogonol.Forward=vec;
+    orthogonol.Right=right;
+    orthogonol.Up=up;
     return orthogonol;
 };
 
