@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "baseClasses.h"
+
 using namespace std;
 
 struct ShaderInputs {
@@ -186,9 +188,11 @@ class World {
 class Camera {
     public:
     //position
-    std::vector<double> vec3D_c_pos = {3.0, -10.0, 0.0};
+    //std::vector<double> vec3D_c_pos = {3.0, -10.0, 0.0};
+    Vec3D vec3D_c_pos = {3.0,-10.0, 0.0};
     //unit vector
-    std::vector<double> vec3D_c_vec = {0.0, 1.0, 0.0};
+    //std::vector<double> vec3D_c_vec = {0.0, 1.0, 0.0};
+    Vec3D vec3D_c_vec = {0.0, 1.0, 0.0};
 
     //camera info
     double fov = 75.0;

@@ -2,6 +2,7 @@
 #define FUNCTIONS_H
 
 #include <vector>  // Required for std::vector
+#include "baseClasses.h"
 
 using namespace std;
 
@@ -21,9 +22,9 @@ double get_vectors_angle(const std::vector<double>& ray1, const std::vector<doub
 std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal);
 
 //applied rotation matrix based on degrees from centre
-std::vector<double> calculate_ray_heading(
-    const std::vector<double>& input_vector, 
-    const double& fov, 
+Vec3D calculate_ray_heading(
+    const Vec3D& input_vector,
+    const double& fov,
     const std::vector<double>& uv
 );
 

@@ -4,10 +4,12 @@
 #include <fstream>
 #include <cmath>
 #include <math.h>
+#include "lib.h"
+#include "baseClasses.h"
 
 using namespace std;
 
-#include "lib.h"
+
 
 
 //main function
@@ -20,11 +22,11 @@ int main() {
     State state;
 
     //configure camera
-    //state.camera.vec3D_c_vec = {0,-1.0,0};
-    //state.camera.vec3D_c_pos = {3, 10, 0};
+    state.camera.vec3D_c_pos = Vec3D(-10,0,0);
+    state.camera.vec3D_c_vec = Vec3D(1,0,0);
     
     //configure render options
-    state.camera.res={1024,1024};
+    state.camera.res={128,128};
     state.camera.max_bounce=0;
 
     //initialize buffer
@@ -98,6 +100,12 @@ int main() {
     light2.color={200,200,255};
     state.world.addLight(light2);
 
+
+    camera.render();
+
+    buffer.output_buffers_to_file("./tmp/", true);
+
+    /*
     Animator animator(camera);
     animator.steps=60;
 
@@ -144,7 +152,7 @@ int main() {
     animator.addPin(p_pin2);
 
     animator.RenderFrames();
-
+    */
 
     //begin render process
 

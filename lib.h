@@ -10,6 +10,7 @@
 #include "functions.h"
 #include "rays.h"
 #include "mathHelper.h"
+#include "baseClasses.h"
 
 using namespace std;
 
@@ -114,8 +115,11 @@ class Render {
     //raycasting render pass
     void assign_rays() {
         //get camera
-        std::vector<double> cam_pos = state.camera.vec3D_c_pos;
-        std::vector<double> cam_euler = state.camera.vec3D_c_vec;
+        //std::vector<double> cam_pos = state.camera.vec3D_c_pos;
+        //std::vector<double> cam_euler = state.camera.vec3D_c_vec;
+        Vec3D cam_pos = state.camera.vec3D_c_pos;
+        Vec3D cam_euler = state.camera.vec3D_c_vec;
+
 
         //get UVs
         for (int x = 0; x < state.camera.res[0]; x++) {
@@ -127,10 +131,10 @@ class Render {
                 std::vector<double> uv = {uv_x, uv_y};
 
                 //use UV value to calculate the ray
-                std::vector<double> ray_euler = calculate_ray_heading(cam_euler, state.camera.fov, uv);
+                Vec3D ray_euler = calculate_ray_heading(cam_euler.to_double(), state.camera.fov, uv);
 
                 //create rgb pixel
-                Ray ray = cast_ray(cam_pos, ray_euler);
+                Ray ray = cast_ray(cam_pos.to_double(), ray_euler.to_double());
 
 
                 //assign to buffer

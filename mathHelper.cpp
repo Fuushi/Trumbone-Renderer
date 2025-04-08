@@ -1,4 +1,5 @@
 #include "mathHelper.h"
+#include "baseClasses.h"
 #include <vector>
 #include <cmath>
 
@@ -77,23 +78,27 @@ double vector_dot_product(const std::vector<double>& vec_a, const std::vector<do
     return product;
 };
 
-std::vector<double> matrix_vector_multiplication(
-    const std::vector<double>& vector1,
+Vec3D matrix_vector_multiplication(
+    const Vec3D& vector1,
     const std::vector<std::vector<double>>& matrix) 
 {
+    // Matrix vector is stored with legacy <vec> because dimensionality is arbitrary
     // Ensure dimensions match for multiplication
     // again, not handled to avoid a compiler error
+
+    //converts to legacy vector for matrix multiplication
+    std::vector<double> legacy_vec = vector1.to_double();
 
     // Resultant vector of size equal to the number of rows in the matrix
     std::vector<double> result(matrix.size(), 0.0);
 
     for (int i = 0; i < matrix.size(); ++i) {
         for (int j = 0; j < matrix[i].size(); ++j) {
-            result[i] += matrix[i][j] * vector1[j];
+            result[i] += matrix[i][j] * legacy_vec[j];
         }
     }
 
-    return result;
+    return Vec3D(result); // Convert back to Vec3D
 };
 
 double linearInterpolate(double a, double b, double t) {

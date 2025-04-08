@@ -2,6 +2,7 @@
 #define MATHHELPER_H
 
 #include <vector>
+#include "baseClasses.h"
 
 //static casts a double vector to int vector & other
 std::vector<int> convert_vec_double_to_int(std::vector<double> vec);
@@ -42,9 +43,9 @@ std::vector<double> vector_cross_product(const std::vector<double>& vec_a, const
 double vector_dot_product(const std::vector<double>& vec_a, const std::vector<double>& vec_b);
 
 //tbh i dont remember what this does but i know it's important
-std::vector<double> matrix_vector_multiplication(
-    const std::vector<double>& vector1,
-    const std::vector<std::vector<double>>& matrix
+Vec3D matrix_vector_multiplication(
+    const Vec3D& vector1,
+    const std::vector<std::vector<double>>& matrix //legacy vector for matrix
 ); 
 
 //animator functions

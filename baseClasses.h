@@ -2,6 +2,7 @@
 #define BASECLASSES_H
 
 #include <math.h> //ensure no double include issues
+#include <vector> //for legacy conversion (remove later)
 
 struct Vec3D {
     double x, y, z;
@@ -38,7 +39,7 @@ struct Vec3D {
     }
 
     //normalize self (++)
-    Vec3D& operator++() {
+    Vec3D& operator++(int) {
         double magnitude = sqrt(x * x + y * y + z * z);
         if (magnitude > 0) {
             x /= magnitude;
@@ -102,11 +103,25 @@ struct Vec3D {
         return *this; // Return the original vector if magnitude is zero (edge case)
     }
     
-    //....
+    //...
+
+    //convert to double
+    std::vector<double> to_double() const {
+        return {x, y, z};
+    }
 
     // constructor
     Vec3D() : x(0), y(0), z(0) {}
     Vec3D(double x, double y, double z) : x(x), y(y), z(z) {}
+    Vec3D(const std::vector<double>& vec) {
+        if (vec.size() >= 3) {
+            x = vec[0];
+            y = vec[1];
+            z = vec[2];
+        } else {
+            x = y = z = 0; // Default to zero if vector size is insufficient
+        }
+    }
 };
 
 
