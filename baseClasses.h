@@ -124,5 +124,86 @@ struct Vec3D {
     }
 };
 
+struct Vec2D {
+    double x, y;
+
+    //basic operators
+
+    //addition
+    Vec2D operator+(const Vec2D& other) const {
+        return Vec2D(x + other.x, y + other.y);
+    }
+
+    //subtraction
+    Vec2D operator-(const Vec2D& other) const {
+        return Vec2D(x - other.x, y - other.y);
+    }
+
+    //scalar multiplication (to divide use the inverse)
+    Vec2D operator%(double scalar) const {
+        return Vec2D(x * scalar, y * scalar);
+    }
+
+    //element wise multiply
+    Vec2D operator*(const Vec2D& other) const {
+        return Vec2D(x * other.x, y * other.y);
+    }
+
+    //element wise divide
+    Vec2D operator/(const Vec2D& other) const {
+        return Vec2D(
+            other.x != 0 ? x / other.x : 0,
+            other.y != 0 ? y / other.y : 0
+        );
+    }
+
+    //normalize self (++)
+    Vec2D& operator++(int) {
+        double magnitude = sqrt(x * x + y * y);
+        if (magnitude > 0) {
+            x /= magnitude;
+            y /= magnitude;
+        }
+        return *this;
+    }
+
+    //assignment operator
+    Vec2D& operator=(const Vec2D& other) {
+        if (this != &other) { // self-assignment check
+            x = other.x;
+            y = other.y;
+        }
+        return *this;
+    }
+
+    //get operators
+
+    //magnitude
+    double magnitude() const {
+        return sqrt(x * x + y * y);
+    }
+
+    //compute operators
+    //...
+
+    //convert to double
+    std::vector<double> to_double() const {
+        return {x, y};
+    }
+
+    //constructor(s)
+    Vec2D() : x(0), y(0) {} // Default constructor
+    Vec2D(double x, double y) : x(x), y(y) {} // Constructor with parameters
+    Vec2D(const std::vector<double>& vec) { //convert from legacy vector
+        //ensure vector size, else default to zero
+        if (vec.size() >= 2) {
+            x = vec[0];
+            y = vec[1];
+        } else {
+            x = y = 0; // Default to zero if vector size is insufficient
+        }
+    }
+};
+
 
 #endif

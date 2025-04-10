@@ -80,25 +80,25 @@ double vector_dot_product(const std::vector<double>& vec_a, const std::vector<do
 
 Vec3D matrix_vector_multiplication(
     const Vec3D& vector1,
-    const std::vector<std::vector<double>>& matrix) 
+    const std::vector<std::vector<double>>& matrix) //uses legacy vector for arbirary matrix size 
 {
-    // Matrix vector is stored with legacy <vec> because dimensionality is arbitrary
-    // Ensure dimensions match for multiplication
-    // again, not handled to avoid a compiler error
+    //Multiplies an nx3 Matrix with a Vec3D
+    // The result will be a Vec3D
 
-    //converts to legacy vector for matrix multiplication
-    std::vector<double> legacy_vec = vector1.to_double();
+    // Initialize the result vector
+    Vec3D result(0,0,0);
 
-    // Resultant vector of size equal to the number of rows in the matrix
-    std::vector<double> result(matrix.size(), 0.0);
-
+    // Iterate through matrix rows (n)
     for (int i = 0; i < matrix.size(); ++i) {
-        for (int j = 0; j < matrix[i].size(); ++j) {
-            result[i] += matrix[i][j] * legacy_vec[j];
-        }
+        // matrix MUST be nx3
+
+        result.x += matrix[i][0] * vector1.x;
+        result.y += matrix[i][1] * vector1.y;
+        result.z += matrix[i][2] * vector1.z;
+
     }
 
-    return Vec3D(result); // Convert back to Vec3D
+    return result; //return the resultant vector
 };
 
 double linearInterpolate(double a, double b, double t) {

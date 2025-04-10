@@ -42,7 +42,7 @@ std::vector<double> vector_cross_product(const std::vector<double>& vec_a, const
 //returns the dot product of 2 double vecs
 double vector_dot_product(const std::vector<double>& vec_a, const std::vector<double>& vec_b);
 
-//tbh i dont remember what this does but i know it's important
+// Multiplies an Nx3 matrix with a Vec3D, returns a Vec3D
 Vec3D matrix_vector_multiplication(
     const Vec3D& vector1,
     const std::vector<std::vector<double>>& matrix //legacy vector for matrix
