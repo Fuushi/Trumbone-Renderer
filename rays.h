@@ -11,7 +11,7 @@ using namespace std;
 struct ShaderInputs {
     int objectID = 0;
     double gloss_diffuse_mix_fac = 0; //0 for neutral (frensel)
-    std::vector<int> material_color = {128,128,128};
+    iVec3D material_color = {128,128,128}; //default grey
 };
 
 class Mesh {
@@ -128,7 +128,7 @@ class Element {
 
 
     //object data
-    std::vector<double> pos = {0,0,0};
+    Vec3D pos;
 
     //update mesh based on pos
     
@@ -198,7 +198,7 @@ class Camera {
     double fov = 75.0;
     int max_bounce = 1;
     int square_res = 1024;
-    std::vector<int> res = {square_res, square_res};
+    iVec2D res = {square_res, square_res};
 };
 
 //define state class

@@ -30,35 +30,35 @@ class OutputBuffer {
 
     //sizes buffers accordingly (incorrect buffer sizing fails silently)
     //This can be constructor
-    void initializeBuffers(std::vector<int> res) {
+    void initializeBuffers(iVec2D res) {
         // Ensure the UV buffer is properly initialized
-        uvs.resize(res[0]);
+        uvs.resize(res.x);
         for (auto& row : uvs) {
-            row.resize(res[1]);
+            row.resize(res.y);
             for (auto& cell : row) {
                 cell.resize(2); // Each cell is a vector with 2 doubles
             }
         }
 
-        rgb_buffer.resize(res[0]);
+        rgb_buffer.resize(res.x);
         for (auto& row : rgb_buffer) {
-            row.resize(res[1]);
+            row.resize(res.y);
             for (auto& cell : row) {
                 cell.resize(2); // Each cell is a vector with 2 doubles
             }
         }
         
-        int_array_2.resize(res[0]);
+        int_array_2.resize(res.x);
         for (auto& row : int_array_2) {
-            row.resize(res[1]);
+            row.resize(res.y);
             for (auto& cell : row) {
                 cell.resize(2); // Each cell is a vector with 2 doubles
             }
         }
 
-        ray_euler.resize(res[0]);
+        ray_euler.resize(res.x);
         for (auto& row : ray_euler) {
-            row.resize(res[1]);
+            row.resize(res.y);
             for (auto& cell : row) {
                 cell.resize(2); // Each cell is a vector with 2 doubles
             }
@@ -97,12 +97,12 @@ class Render {
         cout << "Generating UVs" << endl;
 
         int a = 0;
-        for (int x = 0; x < state.camera.res[0]; x++) {
-            for (int y = 0; y < state.camera.res[1]; y++) {
+        for (int x = 0; x < state.camera.res.x; x++) {
+            for (int y = 0; y < state.camera.res.y; y++) {
                 //cout << x << " " << y << endl;
                 // generate UV and assign to UV buffer
-                double uv_x = x / double(state.camera.res[0]);
-                double uv_y = y / double(state.camera.res[1]);
+                double uv_x = x / double(state.camera.res.x);
+                double uv_y = y / double(state.camera.res.y);
 
                 //assign to uv buffer
                 buffer.uvs[x][y] = {uv_x, uv_y}; //for some reason, this line stops the next line from printing
@@ -122,8 +122,8 @@ class Render {
 
 
         //get UVs
-        for (int x = 0; x < state.camera.res[0]; x++) {
-            for (int y = 0; y < state.camera.res[1]; y++) {
+        for (int x = 0; x < state.camera.res.x; x++) {
+            for (int y = 0; y < state.camera.res.y; y++) {
                 //get uvs from buffer
                 double uv_x = buffer.uvs[x][y][0];
                 double uv_y = buffer.uvs[x][y][1];
@@ -134,7 +134,7 @@ class Render {
                 Vec3D ray_euler = calculate_ray_heading(cam_euler.to_double(), state.camera.fov, uv);
 
                 //create rgb pixel
-                Ray ray = cast_ray(cam_pos.to_double(), ray_euler.to_double());
+                Ray ray = cast_ray(cam_pos, ray_euler);
 
 
                 //assign to buffer
@@ -260,7 +260,7 @@ class Render {
 
 
     //ray cast function call, returns Ray struct
-    Ray cast_ray(std::vector<double> ray_origin, std::vector<double> ray_euler, int recursion_depth=0) {
+    Ray cast_ray(const Vec3D& ray_origin, const Vec3D& ray_euler, int recursion_depth=0) {
 
         //decide recursion
         if (recursion_depth > state.camera.max_bounce+1) {
@@ -280,7 +280,7 @@ class Render {
 
             //iterate through faces
             std::vector<int> face;
-            std::vector<std::vector<double>> vertices;
+            std::vector<Vec3D> vertices;
             for (int j = 0; j < element.mesh.faces.size(); j++) {
 
                 //extract face
@@ -288,23 +288,23 @@ class Render {
 
                 //extract vertices
                 vertices = {
-                    vector_add(element.mesh.vertices[face[0]], element.pos),
-                    vector_add(element.mesh.vertices[face[1]], element.pos),
-                    vector_add(element.mesh.vertices[face[2]], element.pos)
+                    element.pos+element.mesh.vertices[face[0]],
+                    element.pos+element.mesh.vertices[face[1]],
+                    element.pos+element.mesh.vertices[face[2]]
                 };
 
                 //define edges
-                std::vector<double> edge1 = vector_subtract(vertices[1], vertices[0]); //v2-v1
-                std::vector<double> edge2 = vector_subtract(vertices[2], vertices[0]); //v3-v1
+                Vec3D edge1(vertices[1]-vertices[0]); //v2-v1
+                Vec3D edge2(vertices[2]-vertices[0]); //v3-v1
 
                 //compute normal of the 2 edges (cross(e1,e2))
-                std::vector<double> surface_normal = normalize_vector(vector_cross_product(edge1, edge2));
+                Vec3D surface_normal(edge1.cross(edge2));
 
                 //pvec = cross(ray_vec, e2)
-                std::vector<double> pvec = vector_cross_product(ray_euler, edge2);
+                Vec3D pvec(ray_euler.cross(edge2));
 
                 //det = dot(e1, pvec)
-                double determinant = vector_dot_product(edge1, pvec);
+                double determinant = edge1.dot(pvec);
 
                 //ray parrallel optimization
                 if (determinant == 0) {
@@ -316,41 +316,39 @@ class Render {
                 double inverse_determinant =  1 / determinant;
 
                 //compute u in normal space
-                std::vector<double> tvec = vector_subtract(ray_origin, vertices[0]);
-                double u = vector_dot_product(tvec, pvec) * inverse_determinant;
+                Vec3D tvec(ray_origin-vertices[0]);
+                double u = tvec.dot(pvec) * inverse_determinant;
                 if ((u < 0) || (u > 1)) {
                     //no intersection
                     continue;
                 }
 
                 //compute v in normal space
-                std::vector<double> qvec = vector_cross_product(tvec, edge1);
-                double v = vector_dot_product(ray_euler, qvec) * inverse_determinant;
+                Vec3D qvec(tvec.cross(edge1));
+                double v = ray_euler.dot(qvec) * inverse_determinant;
                 if ((v < 0) || ((u + v) > 1)) {
                     //no intersection
                     continue;
                 }
 
                 //compute t in normal space
-                double t = vector_dot_product(edge2, qvec) * inverse_determinant;
+                double t = edge2.dot(qvec) * inverse_determinant;
                 if (t < 0) {
                     //no intersect
                     continue;
                 }
 
                 //... compute intersect data
-                std::vector<double> intersection_point = vector_add(
-                    scalar_multiply(ray_euler, t), ray_origin
-                );
+                Vec3D intersection_point((ray_euler%t)+ray_origin);
 
                 //calculate depth
-                double depth = vector_difference(intersection_point, ray_origin);
+                double depth = vector_difference(intersection_point.to_double(), ray_origin.to_double());
 
                 //add intersect to array
                 Intersect intersect(element);
                 intersect.depth = depth;
-                intersect.intersect_point = intersection_point;
-                intersect.surface_normal = surface_normal; 
+                intersect.intersect_point = intersection_point.to_double();
+                intersect.surface_normal = surface_normal.to_double(); 
 
                 intersects.push_back(intersect);
 
@@ -381,13 +379,13 @@ class Render {
 
 
         //calculate frensel
-        double frensel_deg = 180.0 - get_vectors_angle(closestIntersect.surface_normal, ray_euler);
+        double frensel_deg = 180.0 - get_vectors_angle(closestIntersect.surface_normal, ray_euler.to_double());
 
         //TODO compute illumination...
         Lux lux = calculate_luminance(closestIntersect.intersect_point);
 
         //calculate reflection
-        std::vector<double> reflection_vector = reflect_vector_normal(ray_euler, closestIntersect.surface_normal);
+        std::vector<double> reflection_vector = reflect_vector_normal(ray_euler.to_double(), closestIntersect.surface_normal);
 
         //cast next bounce
         double epsilon = 1e-9; //advance ray forward by some epsilon
@@ -404,8 +402,8 @@ class Render {
 
         //pack struct
         Ray ray;
-        ray.origin = ray_origin;
-        ray.euler = ray_euler;
+        ray.origin = ray_origin.to_double();
+        ray.euler = ray_euler.to_double();
         ray.intersect=true;
         ray.intersect_point = closestIntersect.intersect_point;
         ray.surface_normal = closestIntersect.surface_normal;

@@ -1,9 +1,10 @@
 #include "rays.h"
-#include "functions.h"
-#include "mathHelper.h"
 #include <cmath>
 #include <vector>
 #include <iostream>
+
+#include "functions.h"
+#include "mathHelper.h"
 
 using namespace std;
 
@@ -51,7 +52,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
     //
 
     //Lux sums by color channel
-    std::vector<double> sums = {0,0,0};
+    Vec3D sums;
     for (int i = 0; i < lux.lighting_contributions.size(); i++) {
         //dropoff function
 
@@ -64,31 +65,37 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
 
         //static cast color to double and normalize
         //multiply channel by Lux to get color Lux
-        std::vector<double> color = set_magnitude(convert_vec_int_to_double(lux.lighting_contributions[i].color), 1.0);
+        Vec3D color(set_magnitude(convert_vec_int_to_double(lux.lighting_contributions[i].color), 1.0));
         if (lux.lighting_contributions[i].obstructed) {
             continue;
         }
         
         // sum += color * brightness(lumine) * influence
-        sums[0] = sums[0] + color[0] * ((lux.lighting_contributions[i].brightness*influence));
-        sums[1] = sums[1] + color[1] * ((lux.lighting_contributions[i].brightness*influence));
-        sums[2] = sums[2] + color[2] * ((lux.lighting_contributions[i].brightness*influence));
+        sums.x = sums.x + color.x * ((lux.lighting_contributions[i].brightness*influence));
+        sums.y = sums.y + color.y * ((lux.lighting_contributions[i].brightness*influence));
+        sums.z = sums.z + color.z * ((lux.lighting_contributions[i].brightness*influence));
         
         
     };
     //max function for alphas
-    for (int i=0; i<sums.size(); i++) {sums[i]=min(sums[i],255.0);};
+    sums.x = min(sums.x, 255.0);
+    sums.y = min(sums.y, 255.0);
+    sums.z = min(sums.z, 255.0);
 
     //define material colors from inputs
-    std::vector<int> material_color = shader_inputs.material_color;
+    iVec3D material_color = shader_inputs.material_color;
 
     //local color after illuminance
-    std::vector<int> local_color = convert_vec_double_to_int(
+    iVec3D local_color_legacy = convert_vec_double_to_int( //TODO rewrite legacy code
         vector_multiply(
-            convert_vec_int_to_double(material_color),
-            sums
+            convert_vec_int_to_double(material_color.to_vec()),
+            sums.to_double()
         )
     );
+
+    // multiplies material color by illuminance for each channel in double precision
+    // before converting back to int (i need a function for this)
+    iVec3D local_color = convert_vec_double_to_int((material_color.to_double()*sums).to_double());
 
     const std::vector<int> sky_color = world.sky_color; //20,25,20
     if (!ray.intersect) {
@@ -98,7 +105,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
 
     // no next reflection (maxed out), return local color
     if (ray.reflection_color.empty()) {
-        return local_color; //return local color
+        return local_color.to_vec(); //return local color
     }
 
     //here we can assume a reflection
@@ -107,7 +114,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
     //get local color
     if (ray.intersect) {
         //material color
-        ray.color=local_color;
+        ray.color=local_color.to_vec();
     } else {
         //sky color
         ray.color = sky_color;

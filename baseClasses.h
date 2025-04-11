@@ -205,5 +205,156 @@ struct Vec2D {
     }
 };
 
+struct iVec3D {
+    int x, y, z;
+
+    //basic operators
+
+    // addition
+    iVec3D operator+(const iVec3D& other) const {
+        return iVec3D(x + other.x, y + other.y, z + other.z);
+    }
+
+    // subtraction
+    iVec3D operator-(const iVec3D& other) const {
+        return iVec3D(x - other.x, y - other.y, z - other.z);
+    }
+
+    // scalar multiplication (to divide use the inverse)
+    iVec3D operator%(int scalar) const {
+        return iVec3D(x * scalar, y * scalar, z * scalar);
+    }
+
+    // element wise multiply
+    iVec3D operator*(const iVec3D& other) const {
+        return iVec3D(x * other.x, y * other.y, z * other.z);
+    }
+
+    // element wise divide
+    iVec3D operator/(const iVec3D& other) const {
+        return iVec3D(
+            other.x != 0 ? x / other.x : 0,
+            other.y != 0 ? y / other.y : 0,
+            other.z != 0 ? z / other.z : 0
+        );
+    }
+
+    // normalize self (++)
+    // resultant magnitude will always be 255
+    iVec3D& operator++(int) {
+        double magnitude = sqrt(x * x + y * y + z * z);
+        if (magnitude > 0) {
+            double scale = (255.0) / magnitude;
+            x = static_cast<int>(x * scale);
+            y = static_cast<int>(y * scale);
+            z = static_cast<int>(z * scale);
+        }
+        return *this;
+    }
+
+    // assignment operator
+    iVec3D& operator=(const iVec3D& other) {
+        if (this != &other) { // self-assignment check
+            x = other.x;
+            y = other.y;
+            z = other.z;
+        }
+        return *this;
+    }
+
+    // legacy cast (convert to std::vector<int>)
+    std::vector<int> to_vec() const {
+        return {x, y, z};
+    }
+
+    // convert to double
+    Vec3D to_double() const {
+        return Vec3D(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z));
+    }
+
+    // constructor(s)
+    iVec3D() : x(0), y(0), z(0) {} // Default constructor
+    iVec3D(int x, int y, int z) : x(x), y(y), z(z) {} // Constructor with parameters
+    iVec3D(const std::vector<int>& vec) {
+        if (vec.size() >= 3) {
+            x = vec[0];
+            y = vec[1];
+            z = vec[2];
+        } else {
+            x = y = z = 0; // Default to zero if vector size is insufficient
+        }
+    }
+};
+
+struct iVec2D {
+    int x, y;
+
+    //basic operators
+
+    // addition
+    iVec2D operator+(const iVec2D& other) const {
+        return iVec2D(x + other.x, y + other.y);
+    }
+
+    // subtraction
+    iVec2D operator-(const iVec2D& other) const {
+        return iVec2D(x - other.x, y - other.y);
+    }
+
+    // scalar multiplication (to divide use the inverse)
+    iVec2D operator%(int scalar) const {
+        return iVec2D(x * scalar, y * scalar);
+    }
+
+    // element wise multiply
+    iVec2D operator*(const iVec2D& other) const {
+        return iVec2D(x * other.x, y * other.y);
+    }
+
+    // element wise divide
+    iVec2D operator/(const iVec2D& other) const {
+        return iVec2D(
+            other.x != 0 ? x / other.x : 0,
+            other.y != 0 ? y / other.y : 0
+        );
+    }
+
+    // normalize self (++)
+    // resultant magnitude will always be 255
+    iVec2D& operator++(int) {
+        double magnitude = sqrt(x * x + y * y);
+        if (magnitude > 0) {
+            double scale = (255.0) / magnitude;
+            x = static_cast<int>(x * scale);
+            y = static_cast<int>(y * scale);
+        }
+        return *this;
+    }
+
+    // assignment operator
+    iVec2D& operator=(const iVec2D& other) {
+        if (this != &other) { // self-assignment check
+            x = other.x;
+            y = other.y;
+        }
+        return *this;
+    }
+
+    // legacy cast (convert to std::vector<int>)
+    std::vector<int> to_vec() const {
+        return {x, y};
+    }
+
+    // convert to double
+    std::vector<double> to_double() const {
+        return {static_cast<double>(x), static_cast<double>(y)};
+    }
+
+    // constructor(s)
+    iVec2D() : x(0), y(0) {} // Default constructor
+    iVec2D(int x, int y) : x(x), y(y) {} // Constructor with parameters
+    // no legacy casting for ivecs
+};
+
 
 #endif

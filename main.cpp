@@ -26,7 +26,7 @@ int main() {
     state.camera.vec3D_c_vec = Vec3D(1,0,0);
     
     //configure render options
-    state.camera.res={128,128};
+    state.camera.res=iVec2D(512,512);
     state.camera.max_bounce=0;
 
     //initialize buffer
