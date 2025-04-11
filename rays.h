@@ -17,10 +17,10 @@ struct ShaderInputs {
 class Mesh {
     public:
     // Empty mesh, no vertices or faces initially
-    std::vector<std::vector<double>> vertices;
-    std::vector<std::vector<int>> faces;
+    std::vector<Vec3D> vertices;
+    std::vector<iVec3D> faces;
 
-    void update_mesh(std::vector<std::vector<double>> new_vertices, std::vector<std::vector<int>> new_faces) {
+    void update_mesh(const std::vector<Vec3D>& new_vertices, const std::vector<iVec3D>& new_faces) {
         vertices = new_vertices;
         faces = new_faces;
         return;
@@ -36,7 +36,7 @@ class Procedural_meshes {
     //procedurally generates a planar mesh and assigns it to the Mesh object
     void plane(Mesh& mesh) {
         // Define new vertices and faces
-        std::vector<std::vector<double>> newVertices = {
+        std::vector<Vec3D> newVertices = {
             {0.0, -6.0, -6.0},
             {0.0, -6.0, 6.0},
             {0.0, 6.0, -6.0},
@@ -44,7 +44,7 @@ class Procedural_meshes {
         };
 
 
-        std::vector<std::vector<int>> newFaces = {
+        std::vector<iVec3D> newFaces = {
             {0, 1, 2},//,  // First face
             {2, 1, 3}   // Second face
         };
@@ -54,7 +54,7 @@ class Procedural_meshes {
     }
 
     void neutral_surface(Mesh& mesh) {
-        std::vector<std::vector<double>> vertices = {
+        std::vector<Vec3D> vertices = {
             {-1, -1, 0},
             {-1, 1, 0},
             {1, -1, 0},
@@ -62,7 +62,7 @@ class Procedural_meshes {
 
         };
 
-        std::vector<std::vector<int>> faces = {
+        std::vector<iVec3D> faces = {
             {0, 1, 2},//,  // First face
             {2, 1, 3}   // Second face
         };
@@ -72,14 +72,14 @@ class Procedural_meshes {
     }
 
     void neutral_surface_rotated(Mesh& mesh) {
-        std::vector<std::vector<double>> vertices {
+        std::vector<Vec3D> vertices {
             {-1, 0, -1},
             {-1, 0, 1},
             {1, 0, -1},
             {1, 0, 1}
         };
 
-        std::vector<std::vector<int>> faces = {
+        std::vector<iVec3D> faces = {
             {0, 1, 2},//,  // First face
             {2, 1, 3}   // Second face
         };
@@ -92,7 +92,7 @@ class Procedural_meshes {
         double halfSize = size / 2.0;
 
         // Define the vertices of the cube
-        std::vector<std::vector<double>> newVertices = {
+        std::vector<Vec3D> newVertices = {
             {-halfSize, -halfSize, -halfSize},  // Vertex 0
             {halfSize, -halfSize, -halfSize},   // Vertex 1
             {halfSize, halfSize, -halfSize},    // Vertex 2
@@ -104,7 +104,7 @@ class Procedural_meshes {
         };
 
         // Define the faces of the cube using the vertices
-        std::vector<std::vector<int>> newFaces = {
+        std::vector<iVec3D> newFaces = {
             {0, 1, 2}, {0, 2, 3}, // Front face
             {4, 5, 6}, {4, 6, 7}, // Back face
             {0, 1, 5}, {0, 5, 4}, // Bottom face
@@ -155,8 +155,8 @@ class Light {
 
     std::string type = "sun";
     double brightness = 1.0;
-    std::vector<int> color = {255,255,255};
-    std::vector<double> vec;
+    iVec3D color = {255,255,255};
+    Vec3D vec;
 };
 
 
@@ -165,7 +165,7 @@ class World {
     public:
 
     //world contains global render properties
-    std::vector<int> sky_color = {50,50,60};
+    iVec3D sky_color = {50,50,60};
 
 
     //world contains an array of elements

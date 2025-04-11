@@ -32,7 +32,7 @@ std::vector<int> ambient_occlusion(Ray ray, World world) {
     //fast, but inaccurate lighting effect
     std::vector<int> sum = {0,0,0};
     for (int i = 0; i < world.lights.size(); i++) {
-        double angle = get_vectors_angle(ray.surface_normal, world.lights[i].vec);
+        double angle = get_vectors_angle(ray.surface_normal, world.lights[i].vec.to_double());
         //^ tangent = 0, parallel = 90, away = 180
 
         sum[0] = sum[0] + static_cast<int>(angle);
@@ -97,10 +97,10 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
     // before converting back to int (i need a function for this)
     iVec3D local_color = convert_vec_double_to_int((material_color.to_double()*sums).to_double());
 
-    const std::vector<int> sky_color = world.sky_color; //20,25,20
+    const iVec3D sky_color = world.sky_color; //20,25,20
     if (!ray.intersect) {
         //no intersect, return sky
-        return sky_color;
+        return sky_color.to_vec(); //return sky color
     }
 
     // no next reflection (maxed out), return local color
@@ -117,7 +117,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
         ray.color=local_color.to_vec();
     } else {
         //sky color
-        ray.color = sky_color;
+        ray.color = sky_color.to_vec();
     }
 
     //new color vector

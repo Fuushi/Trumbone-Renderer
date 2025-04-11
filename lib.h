@@ -145,7 +145,7 @@ class Render {
                 if (!ray.reflection_color.empty()) {
                     buffer.int_array_2[x][y] = ray.reflection_color;
                 } else {
-                    buffer.int_array_2[x][y] = state.world.sky_color; //sky color
+                    buffer.int_array_2[x][y] = state.world.sky_color.to_vec(); //sky color
                 }
 
             };
@@ -160,39 +160,43 @@ class Render {
         assign_rays();
     };
 
-    FastRay fast_ray_cast(std::vector<double> origin, std::vector<double> vec) {
+    FastRay fast_ray_cast(std::vector<double> origin, std::vector<double> vec_legacy) {
         //so long as i never have to touch this code again, it is maintainable
         //returns first detected intersect
         //iterate through meshes
+
+        //legacy casy
+        Vec3D vec(vec_legacy);
+
         for (int i = 0; i < state.world.elements.size(); i++) {
             Element element = state.world.elements[i];
-            std::vector<int> face;
-            std::vector<std::vector<double>> vertices;
+            std::vector<Vec3D> vertices;
+            iVec3D face;
             //iterate through faces
             for (int j = 0; j < element.mesh.faces.size(); j++) {
 
                 face = element.mesh.faces[j]; //extract mesh data
-                vertices = {element.mesh.vertices[face[0]],element.mesh.vertices[face[1]],element.mesh.vertices[face[2]]};
+                vertices = {element.mesh.vertices[face.x],element.mesh.vertices[face.y],element.mesh.vertices[face.z]};
 
                 //define edges
-                std::vector<double> edge1 = vector_subtract(vertices[1], vertices[0]); //v2-v1
-                std::vector<double> edge2 = vector_subtract(vertices[2], vertices[0]); //v3-v1
+                Vec3D edge1 = vertices[1] - vertices[0]; //v2-v1
+                Vec3D edge2 = vertices[2] - vertices[0]; //v3-v1
 
                 //math... elaborated in slow function
-                std::vector<double> pvec = vector_cross_product(vec, edge2);
-                double determinant = vector_dot_product(edge1, pvec);
+                Vec3D pvec = vec.cross(edge2); //pvec = cross(ray_vec, e2)
+                double determinant = edge1.dot(pvec); //det = dot(e1, pvec)
                 if (determinant == 0) {continue;}; //ray parrallel optimization
                 double inverse_determinant =  1 / determinant;
-                std::vector<double> tvec = vector_subtract(origin, vertices[0]);
-                double u = vector_dot_product(tvec, pvec) * inverse_determinant;
+                Vec3D tvec = Vec3D(origin)-vertices[0]; //tvec = ray_origin - v1
+                double u = tvec.dot(pvec) * inverse_determinant; //compute u in normal space
                 if ((u < 0) || (u > 1)) {continue;}
-                std::vector<double> qvec = vector_cross_product(tvec, edge1);
-                double v = vector_dot_product(vec, qvec) * inverse_determinant;
+                Vec3D qvec = tvec.cross(edge1); //qvec = cross(tvec, e1)
+                double v = vec.dot(qvec) * inverse_determinant; //compute v in normal space
                 if ((v < 0) || ((u + v) > 1)) {continue;}
-                double t = vector_dot_product(edge2, qvec) * inverse_determinant;
+                double t = edge2.dot(qvec) * inverse_determinant; //compute t in normal space
                 if (t < 0) {continue;}
                 //compute intersection
-                std::vector<double> intersection_point = vector_add(scalar_multiply(vec, t), origin);
+                std::vector<double> intersection_point = vector_add(scalar_multiply(vec.to_double(), t), origin);
 
                 //calculate depth
                 double depth = vector_difference(intersection_point, origin);
@@ -222,8 +226,8 @@ class Render {
 
         //pass in light object attributes
         contribution.brightness = light.brightness;
-        contribution.vec = light.vec;
-        contribution.color = light.color;
+        contribution.vec = light.vec.to_double();
+        contribution.color = light.color.to_vec();
 
         //return LightingContribution object
         return contribution;
@@ -236,7 +240,7 @@ class Render {
             //
 
             //light vector is inverted with scalar multiply
-            std::vector<double> inverse_vector = scalar_multiply(state.world.lights[i].vec, -1.0);
+            std::vector<double> inverse_vector = scalar_multiply(state.world.lights[i].vec.to_double(), -1.0);
 
             //advance ray by epsilon
             double epsilon = 1e-9; //advance ray forward by some epsilon
@@ -279,7 +283,7 @@ class Render {
             Element& element = state.world.elements[i];
 
             //iterate through faces
-            std::vector<int> face;
+            iVec3D face;
             std::vector<Vec3D> vertices;
             for (int j = 0; j < element.mesh.faces.size(); j++) {
 
@@ -288,9 +292,9 @@ class Render {
 
                 //extract vertices
                 vertices = {
-                    element.pos+element.mesh.vertices[face[0]],
-                    element.pos+element.mesh.vertices[face[1]],
-                    element.pos+element.mesh.vertices[face[2]]
+                    element.pos+element.mesh.vertices[face.x],
+                    element.pos+element.mesh.vertices[face.y],
+                    element.pos+element.mesh.vertices[face.z]
                 };
 
                 //define edges
@@ -359,7 +363,7 @@ class Render {
         // No intersect optimization (skips shader and goes straight to sky to save performance)
         if (intersects.size() == 0) {
             Ray ray;
-            ray.color = state.world.sky_color; //sky color
+            ray.color = state.world.sky_color.to_vec(); //sky color
             return ray;
         }
 
