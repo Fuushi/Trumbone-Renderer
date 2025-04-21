@@ -5,7 +5,8 @@
 #include <vector> //for legacy conversion (remove later)
 
 struct Vec3D {
-    double x, y, z;
+    double x, y, z; 
+    bool empty = false; //used to check if vector is empty (0,0,0)
     
     //basic operators
 
@@ -126,6 +127,7 @@ struct Vec3D {
 
 struct Vec2D {
     double x, y;
+    bool empty = false; //used to check if vector is empty (0,0)
 
     //basic operators
 
@@ -207,6 +209,7 @@ struct Vec2D {
 
 struct iVec3D {
     int x, y, z;
+    bool empty = false;
 
     //basic operators
 
@@ -288,6 +291,7 @@ struct iVec3D {
 
 struct iVec2D {
     int x, y;
+    bool empty = false;
 
     //basic operators
 

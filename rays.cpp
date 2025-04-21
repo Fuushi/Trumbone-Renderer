@@ -32,7 +32,7 @@ std::vector<int> ambient_occlusion(Ray ray, World world) {
     //fast, but inaccurate lighting effect
     std::vector<int> sum = {0,0,0};
     for (int i = 0; i < world.lights.size(); i++) {
-        double angle = get_vectors_angle(ray.surface_normal, world.lights[i].vec.to_double());
+        double angle = get_vectors_angle(ray.surface_normal, world.lights[i].vec);
         //^ tangent = 0, parallel = 90, away = 180
 
         sum[0] = sum[0] + static_cast<int>(angle);
@@ -104,7 +104,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
     }
 
     // no next reflection (maxed out), return local color
-    if (ray.reflection_color.empty()) {
+    if (ray.reflection_color.empty) {
         return local_color.to_vec(); //return local color
     }
 
@@ -124,7 +124,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
     std::vector<int> color = {0,0,0};
 
     //mix colors by frensel fac
-    color = mix_color(ray.reflection_color, ray.color, limit_range(ray.frensel/180+shader_inputs.gloss_diffuse_mix_fac, 0, 1));
+    color = mix_color(ray.reflection_color.to_vec(), ray.color.to_vec(), limit_range(ray.frensel/180+shader_inputs.gloss_diffuse_mix_fac, 0, 1));
 
     //return new color
     return color;

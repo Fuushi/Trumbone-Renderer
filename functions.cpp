@@ -11,6 +11,10 @@
 void print_v(const std::vector<double> vec) {std::cout << vec[0] << " " << vec[1] << " " << vec[2] << std::endl;}
 void print_v(const std::vector<float> vec) {print_v(std::vector<double>(vec.begin(), vec.end()));}
 void print_v(const std::vector<int> vec) {print_v(std::vector<double>(vec.begin(), vec.end()));}
+//vec3D overloads
+void print_v(const Vec3D& vec) {std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;}
+void print_v(const iVec3D& vec) {std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;}
+void print_v(const Vec2D& vec) {std::cout << vec.x << " " << vec.y << std::endl;}
 
 //simple functions
 bool pin_interpolator_range_checker(double t, int flag) {
@@ -52,13 +56,13 @@ Orthogonol get_orthogonol(const Vec3D& vec) {
 
 //Complex vector operations
 //gets the angle between 2 vectors in degrees
-double get_vectors_angle(const std::vector<double>& ray1, const std::vector<double>& ray2) {
+double get_vectors_angle(const Vec3D& ray1, const Vec3D& ray2) {
 
     // Compute the dot product of the vectors
-    double dot_product = vector_dot_product(ray1, ray2);
+    double dot_product = ray1.dot(ray2);
 
     // Compute the cosine of the angle using the dot product formula
-    double cos_theta = dot_product / (get_magnitude(ray1) * get_magnitude(ray2));
+    double cos_theta = dot_product / (ray1.magnitude() * ray2.magnitude());
 
     // Clamp cos_theta to the range [-1, 1] to handle numerical precision issues
     cos_theta = std::max(-1.0, std::min(1.0, cos_theta));
@@ -74,7 +78,7 @@ double get_vectors_angle(const std::vector<double>& ray1, const std::vector<doub
 
 Vec3D rotate_vector_z(const Vec3D& vec, const double& rotation_rad) {
     
-    // Define z-axis rotation matrix
+    // Define z-axis rotation matrix (use legacy structure for matrices)
     std::vector<std::vector<double>> r_z = {
         {cos(rotation_rad), -sin(rotation_rad), 0.0},
         {sin(rotation_rad), cos(rotation_rad), 0.0},
@@ -114,32 +118,35 @@ double getUpDownAngleRadians(const Orthogonol& ortho) {
 }
 
 // Rodrigues' rotation formula: Rotates `v` around axis `u` by `theta` radians
-std::vector<double> rodriques_formaula(const Vec3D& v, const Vec3D& rotation_axis, double rad) {
+Vec3D rodriques_formaula(const Vec3D& v, const Vec3D& rotation_axis, double rad) {
     //calculate offsets
     double cos_theta = std::cos(rad);
     double sin_theta = std::sin(rad);
     double dot = v.dot(rotation_axis);
     
     //rotation matrix
-    return {
+    return Vec3D(
         v.x * cos_theta + (rotation_axis.y * v.z - rotation_axis.z * v.y) * sin_theta + rotation_axis.x * dot * (1 - cos_theta),
         v.y * cos_theta + (rotation_axis.z * v.x - rotation_axis.x * v.z) * sin_theta + rotation_axis.y * dot * (1 - cos_theta),
         v.z * cos_theta + (rotation_axis.x * v.y - rotation_axis.y * v.x) * sin_theta + rotation_axis.z * dot * (1 - cos_theta)
-    };
+    );
 }
 
-std::vector<double> reflect_vector_normal(std::vector<double> vec, std::vector<double> normal) {
-    //normalize the vector
-    std::vector<double> normalized_vec = normalize_vector(vec);
+//reflects a vector along a normal
+Vec3D reflect_vector_normal(Vec3D vec, Vec3D normal) {
+    //normalize vec
+    vec++; //normalize the vector
+    normal++; //normalize the normal vector
 
-    //get the projection?
-    std::vector<double> projection = scalar_multiply(normal, vector_dot_product(vec, normal));
+    //get the projection
+    Vec3D projection = normal % (vec.dot(normal));
 
-    //calculate reflection
-    std::vector<double> reflection = vector_subtract(vec, scalar_multiply(projection, 2.0));
+    //calculate projection
+    Vec3D reflection = vec - (projection % 2.0);
 
+    //return
     return reflection;
-};
+}
 
 Vec3D calculate_ray_heading(
     const Vec3D& input_vector,
@@ -178,10 +185,10 @@ Vec3D calculate_ray_heading(
     double vertical_angle_rad = getUpDownAngleRadians(orth);
     
     //rotate along the orthoganal right of the camera
-    std::vector<double> u_corrected_matrix = rodriques_formaula(z_rotated_matrix, orth.Right, vertical_angle_rad);
+    Vec3D u_corrected_matrix = rodriques_formaula(z_rotated_matrix, orth.Right, vertical_angle_rad);
 
     //convert to Vec3D in place while working above
-    Vec3D u_corrected_vec(u_corrected_matrix[0], u_corrected_matrix[1], u_corrected_matrix[2]);
+    Vec3D u_corrected_vec(u_corrected_matrix.x, u_corrected_matrix.y, u_corrected_matrix.z);
     
     //normalize
     u_corrected_vec++;

@@ -138,12 +138,12 @@ class Render {
 
 
                 //assign to buffer
-                buffer.rgb_buffer[x][y] = ray.color;
-                buffer.ray_euler[x][y] = ray.reflection_vec;
+                buffer.rgb_buffer[x][y] = ray.color.to_vec();
+                buffer.ray_euler[x][y] = ray.reflection_vec.to_double(); //reflection vector
 
                 //
-                if (!ray.reflection_color.empty()) {
-                    buffer.int_array_2[x][y] = ray.reflection_color;
+                if (!ray.reflection_color.empty) {
+                    buffer.int_array_2[x][y] = ray.reflection_color.to_vec(); //reflection color
                 } else {
                     buffer.int_array_2[x][y] = state.world.sky_color.to_vec(); //sky color
                 }
@@ -213,9 +213,9 @@ class Render {
         return ray;
     };
 
-    LightingContribution cast_light_ray(Light light, std::vector<double> ray_origin, std::vector<double> ray_vec) {
+    LightingContribution cast_light_ray(Light light, const Vec3D& ray_origin, const Vec3D& ray_vec) {
         //calculate ray
-        FastRay light_ray = fast_ray_cast(ray_origin, ray_vec);
+        FastRay light_ray = fast_ray_cast(ray_origin.to_double(), ray_vec.to_double());
 
         //initialize return object
         LightingContribution contribution;
@@ -233,23 +233,25 @@ class Render {
         return contribution;
     };
 
-    Lux calculate_luminance(std::vector<double> origin) {
+    Lux calculate_luminance(const Vec3D& origin) {
         //...
         std::vector<LightingContribution> lighting_contributions;
         for (int i = 0; i < state.world.lights.size(); i++) {
             //
 
             //light vector is inverted with scalar multiply
-            std::vector<double> inverse_vector = scalar_multiply(state.world.lights[i].vec.to_double(), -1.0);
+            //std::vector<double> inverse_vector = scalar_multiply(state.world.lights[i].vec.to_double(), -1.0);
+            Vec3D inverse_vec = state.world.lights[i].vec%-1.0;
 
             //advance ray by epsilon
             double epsilon = 1e-9; //advance ray forward by some epsilon
-            std::vector<double> advanced_ray = vector_add(origin, set_magnitude(inverse_vector, epsilon));
+            Vec3D advanced_ray = origin + (inverse_vec++ % epsilon);
+            //std::vector<double> advanced_ray = vector_add(origin, set_magnitude(inverse_vector, epsilon));
 
             //compute lighting
             lighting_contributions.push_back(
                 cast_light_ray(
-                    state.world.lights[i], advanced_ray, inverse_vector
+                    state.world.lights[i], advanced_ray, inverse_vec
             ));
         };
 
@@ -364,6 +366,7 @@ class Render {
         if (intersects.size() == 0) {
             Ray ray;
             ray.color = state.world.sky_color.to_vec(); //sky color
+            ray.reflection_color.empty=true; //set empty flag to true
             return ray;
         }
 
@@ -383,20 +386,18 @@ class Render {
 
 
         //calculate frensel
-        double frensel_deg = 180.0 - get_vectors_angle(closestIntersect.surface_normal, ray_euler.to_double());
+        double frensel_deg = 180.0 - get_vectors_angle(closestIntersect.surface_normal, ray_euler);
 
         //TODO compute illumination...
         Lux lux = calculate_luminance(closestIntersect.intersect_point);
 
         //calculate reflection
-        std::vector<double> reflection_vector = reflect_vector_normal(ray_euler.to_double(), closestIntersect.surface_normal);
+        Vec3D reflection_vector = reflect_vector_normal(ray_euler, closestIntersect.surface_normal);
 
         //cast next bounce
         double epsilon = 1e-9; //advance ray forward by some epsilon
-        std::vector<double> advanced_ray = vector_add(
-            closestIntersect.intersect_point, 
-            set_magnitude(reflection_vector, epsilon));
-
+        Vec3D advanced_ray = closestIntersect.intersect_point + reflection_vector.set_magnitude(epsilon);
+        
         //cast reflection ray from intersect
         Ray reflect_ray = cast_ray(
             advanced_ray, 

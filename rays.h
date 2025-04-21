@@ -211,23 +211,23 @@ class State {
 
 struct Ray {
     //struct contains complex data related to ray intersections
-    std::vector<double> origin;
-    std::vector<double> euler;
-    bool intersect = false; //not implemented
+    Vec3D origin;
+    Vec3D euler;
+    bool intersect = false; //not implemented?
     double depth = 0.0;
     double frensel = 0.0;
-    std::vector<int> color = {20,25,20}; //20,25,20
-    std::vector<double> intersect_point = {0.0,0.0,0.0};
-    std::vector<double> surface_normal = {0.0,0.0,0.0};
-    std::vector<int> reflection_color;
-    std::vector<double> reflection_vec = {0.0,0.0,0.0};
+    iVec3D color = {20,25,20}; //20,25,20
+    Vec3D intersect_point = {0.0,0.0,0.0};
+    Vec3D surface_normal = {0.0,0.0,0.0};
+    iVec3D reflection_color;
+    Vec3D reflection_vec = {0.0,0.0,0.0};
 
 };
 
 struct Intersect {
     double depth;
-    std::vector<double> intersect_point;
-    std::vector<double> surface_normal;
+    Vec3D intersect_point;
+    Vec3D surface_normal;
 
     Element& target; //MUST be initialized
     //...

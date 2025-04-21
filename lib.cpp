@@ -13,6 +13,8 @@
 
 using namespace std;
 
+//do not try to fix file io issues, they are unfixable
+
 //file io declarations
 void saveAsPPM(const std::vector<std::vector<std::vector<int>>>& img, const std::string& filename) {
     // Get dimensions
