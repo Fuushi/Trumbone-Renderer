@@ -16,6 +16,21 @@ void print_v(const Vec3D& vec);
 void print_v(const iVec3D& vec);
 void print_v(const Vec2D& vec);
 
+//Orthogonol vector definition and methods
+struct Orthogonol {
+    Vec3D Forward;
+    Vec3D Right;
+    Vec3D Up;
+};
+
+Orthogonol get_orthogonol(const Vec3D& vec);
+
+Vec3D rotate_vector_z(const Vec3D& vec, const double& rotation_rad);
+
+double getUpDownAngleRadians(const Orthogonol& ortho);
+
+Vec3D rodriques_formaula(const Vec3D& v, const Vec3D& rotation_axis, double rad);
+
 //simple functions
 bool pin_interpolator_range_checker(double t, int flag);
 

@@ -28,12 +28,7 @@ bool pin_interpolator_range_checker(double t, int flag) {
     return true;
 };
 
-//Orthogonol vector definition and methods
-struct Orthogonol {
-    Vec3D Forward;
-    Vec3D Right;
-    Vec3D Up;
-};
+
 //gets orthogonal vector from euler with assumptions
 Orthogonol get_orthogonol(const Vec3D& vec) {
     //get the orthoganol vector from a base vector making assumptions
@@ -108,7 +103,7 @@ double get_z_rotation_rad(Vec3D vec) { //takes copy so i dont have to declare a 
 // Function to calculate the up/down angle in radians
 double getUpDownAngleRadians(const Orthogonol& ortho) {
     // Extract Y and Z components of the Up vector
-    double Ay = ortho.Up.x;
+    double Ay = ortho.Up.y; // Corrected to use the Y component
     double Az = ortho.Up.z;
 
     // Calculate angle in radians using atan2 for correct quadrant

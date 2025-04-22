@@ -34,7 +34,8 @@ std::vector<double> vector_subtract(const std::vector<double>& vec_a, const std:
 std::vector<double> vector_multiply(const std::vector<double>& vec1, const std::vector<double>& vec2);
 
 //gets the distance between 2 double vectors -> double
-double vector_difference(const std::vector<double>& vec1, const std::vector<double>& vec2);
+double vector_difference(const std::vector<double>& vec1, const std::vector<double>& vec2); //depreciation warning
+double vector_difference(const Vec3D& vec1, const Vec3D& vec2); //overload for Vec3D
 
 //returns the cross product of 2 double vecs
 std::vector<double> vector_cross_product(const std::vector<double>& vec_a, const std::vector<double>& vec_b);
@@ -51,7 +52,7 @@ Vec3D matrix_vector_multiplication(
 //animator functions
 double linearInterpolate(double a, double b, double t); //self explanitory
 
-std::vector<double> vector_interpolate(const std::vector<double>& v1, const std::vector<double>& v2, double t, int flag);
+Vec3D vector_interpolate(const Vec3D& v1, const Vec3D& v2, double t, int flag);
 
 
 #endif

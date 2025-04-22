@@ -5,6 +5,7 @@
 #include <cmath>
 #include <math.h>
 #include "lib.h"
+#include "functions.h"
 #include "baseClasses.h"
 
 using namespace std;
@@ -14,6 +15,14 @@ using namespace std;
 
 //main function
 int main() {
+
+
+    Vec3D test_vec = {0,1,1};
+    test_vec++;
+
+    Orthogonol orth = get_orthogonol(test_vec);
+
+    double rads = getUpDownAngleRadians(orth);
 
     //create mesh generator
     Procedural_meshes generator;
@@ -100,12 +109,12 @@ int main() {
     light2.color={200,200,255};
     state.world.addLight(light2);
 
-
     camera.render();
 
     buffer.output_buffers_to_file("./tmp/", true);
+    
+    return 0; //disables animation player
 
-    /*
     Animator animator(camera);
     animator.steps=60;
 
@@ -152,34 +161,7 @@ int main() {
     animator.addPin(p_pin2);
 
     animator.RenderFrames();
-    */
 
-    //begin render process
-
-    //generate UVs
-    //camera.render();
-    
-    //dump to file
-    //buffer.output_buffers_to_file("./tmp/");
-
-    //animator
-    /*
-    for (double i = 0; i < 60*10; i=i+1.0) {
-                //generate UVs
-        //camera.generate_uvs();
-        //std::vector<double> rotation_uv_lmfao = {0.5, 0.6};
-        //state.camera.vec3D_c_vec = rotation_matrix_degrees(
-        //    state.camera.vec3D_c_vec, 75.0, rotation_uv_lmfao
-        //);
-
-
-        //camera.assign_rays();
-        state.camera.vec3D_c_pos[0] = state.camera.vec3D_c_pos[0]+0.1;
-        camera.render();
-        //dump to file
-        buffer.output_buffers_to_file("./tmp/");
-    }
-    */
     cout << "exit 1" << flush;
     return 1;
     

@@ -131,7 +131,7 @@ class Render {
                 std::vector<double> uv = {uv_x, uv_y};
 
                 //use UV value to calculate the ray
-                Vec3D ray_euler = calculate_ray_heading(cam_euler.to_double(), state.camera.fov, uv);
+                Vec3D ray_euler = calculate_ray_heading(cam_euler, state.camera.fov, uv);
 
                 //create rgb pixel
                 Ray ray = cast_ray(cam_pos, ray_euler);
@@ -160,13 +160,11 @@ class Render {
         assign_rays();
     };
 
-    FastRay fast_ray_cast(std::vector<double> origin, std::vector<double> vec_legacy) {
+    FastRay fast_ray_cast(const Vec3D& origin, const Vec3D& vec) {
         //so long as i never have to touch this code again, it is maintainable
         //returns first detected intersect
         //iterate through meshes
 
-        //legacy casy
-        Vec3D vec(vec_legacy);
 
         for (int i = 0; i < state.world.elements.size(); i++) {
             Element element = state.world.elements[i];
@@ -196,7 +194,7 @@ class Render {
                 double t = edge2.dot(qvec) * inverse_determinant; //compute t in normal space
                 if (t < 0) {continue;}
                 //compute intersection
-                std::vector<double> intersection_point = vector_add(scalar_multiply(vec.to_double(), t), origin);
+                Vec3D intersection_point = origin + (vec % t);//vector_add(scalar_multiply(vec.to_double(), t), origin);
 
                 //calculate depth
                 double depth = vector_difference(intersection_point, origin);
@@ -215,7 +213,7 @@ class Render {
 
     LightingContribution cast_light_ray(Light light, const Vec3D& ray_origin, const Vec3D& ray_vec) {
         //calculate ray
-        FastRay light_ray = fast_ray_cast(ray_origin.to_double(), ray_vec.to_double());
+        FastRay light_ray = fast_ray_cast(ray_origin, ray_vec);
 
         //initialize return object
         LightingContribution contribution;
@@ -226,8 +224,8 @@ class Render {
 
         //pass in light object attributes
         contribution.brightness = light.brightness;
-        contribution.vec = light.vec.to_double();
-        contribution.color = light.color.to_vec();
+        contribution.vec = light.vec;
+        contribution.color = light.color;
 
         //return LightingContribution object
         return contribution;
@@ -348,13 +346,13 @@ class Render {
                 Vec3D intersection_point((ray_euler%t)+ray_origin);
 
                 //calculate depth
-                double depth = vector_difference(intersection_point.to_double(), ray_origin.to_double());
+                double depth = vector_difference(intersection_point, ray_origin);
 
                 //add intersect to array
                 Intersect intersect(element);
                 intersect.depth = depth;
-                intersect.intersect_point = intersection_point.to_double();
-                intersect.surface_normal = surface_normal.to_double(); 
+                intersect.intersect_point = intersection_point;
+                intersect.surface_normal = surface_normal; 
 
                 intersects.push_back(intersect);
 
@@ -407,8 +405,8 @@ class Render {
 
         //pack struct
         Ray ray;
-        ray.origin = ray_origin.to_double();
-        ray.euler = ray_euler.to_double();
+        ray.origin = ray_origin;
+        ray.euler = ray_euler;
         ray.intersect=true;
         ray.intersect_point = closestIntersect.intersect_point;
         ray.surface_normal = closestIntersect.surface_normal;
@@ -436,18 +434,18 @@ class Render {
 
 
 struct Pin {
-    std::vector<double>& target;
-    std::vector<double> value1;
-    std::vector<double> value2;
+    Vec3D& target;
+    Vec3D value1;
+    Vec3D value2;
     int f1;
     int f2;
 
     int interpolatorFlag;
 
     // Constructor
-    Pin(std::vector<double>& target, 
-        const std::vector<double>& value1, 
-        const std::vector<double>& value2, 
+    Pin(Vec3D& target, 
+        const Vec3D& value1, 
+        const Vec3D& value2, 
         int f1, int f2, 
         int interpolatorFlag)
         : target(target), value1(value1), value2(value2), f1(f1), f2(f2), interpolatorFlag(interpolatorFlag) {}
@@ -474,7 +472,7 @@ class Animator {
             ));
             
             //static_cast<double>(step) / static_cast<double>(pins[i].f2)
-            std::vector<double> cache = vector_interpolate(
+            Vec3D cache = vector_interpolate(
                 pins[i].value1,
                 pins[i].value2,
                 t, //TODO correctly calculate
@@ -483,9 +481,9 @@ class Animator {
 
             //if pin is active apply animation
             if (pin_interpolator_range_checker(t, pins[i].interpolatorFlag)) {
-                pins[i].target[0] = cache[0];
-                pins[i].target[1] = cache[1];
-                pins[i].target[2] = cache[2];
+                pins[i].target.x = cache.x;
+                pins[i].target.y = cache.y;
+                pins[i].target.z = cache.z;
             };
 
         };

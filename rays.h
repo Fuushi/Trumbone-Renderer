@@ -244,8 +244,8 @@ struct LightingContribution {
     bool obstructed;
     double depth;
     double brightness;
-    std::vector<double> vec;
-    std::vector<int> color;
+    Vec3D vec;
+    iVec3D color;
     //...
 };
 

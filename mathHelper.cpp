@@ -56,7 +56,13 @@ std::vector<double> vector_multiply(const std::vector<double>& vec1, const std::
 }
 
 double vector_difference(const std::vector<double>& vec1, const std::vector<double>& vec2) {
+    //TODO depreciate this function in favor of the Vec3D version
     double sqare_sum = (vec1[0]-vec2[0])*(vec1[0]-vec2[0]) + ((vec1[1]-vec2[1])*(vec1[1]-vec2[1])) + (((vec1[2]-vec2[2])*(vec1[2]-vec2[2]))); 
+    return sqrt(sqare_sum);
+};
+
+double vector_difference(const Vec3D& vec1, const Vec3D& vec2) {
+    double sqare_sum = (vec1.x-vec2.x)*(vec1.x-vec2.x) + ((vec1.y-vec2.y)*(vec1.y-vec2.y)) + (((vec1.z-vec2.z)*(vec1.z-vec2.z))); 
     return sqrt(sqare_sum);
 };
 
@@ -80,35 +86,30 @@ double vector_dot_product(const std::vector<double>& vec_a, const std::vector<do
 
 Vec3D matrix_vector_multiplication(
     const Vec3D& vector1,
-    const std::vector<std::vector<double>>& matrix) //uses legacy vector for arbirary matrix size 
+    const std::vector<std::vector<double>>& matrix) //uses legacy vector for arbitrary matrix size 
 {
-    //Multiplies an nx3 Matrix with a Vec3D
+    // Multiplies an nx3 Matrix with a Vec3D
     // The result will be a Vec3D
 
     // Initialize the result vector
-    Vec3D result(0,0,0);
+    Vec3D result(0, 0, 0);
 
-    // Iterate through matrix rows (n)
-    for (int i = 0; i < matrix.size(); ++i) {
-        // matrix MUST be nx3
+    // Compute the dot product of each row of the matrix with the vector
+    result.x = matrix[0][0] * vector1.x + matrix[0][1] * vector1.y + matrix[0][2] * vector1.z;
+    result.y = matrix[1][0] * vector1.x + matrix[1][1] * vector1.y + matrix[1][2] * vector1.z;
+    result.z = matrix[2][0] * vector1.x + matrix[2][1] * vector1.y + matrix[2][2] * vector1.z;
 
-        result.x += matrix[i][0] * vector1.x;
-        result.y += matrix[i][1] * vector1.y;
-        result.z += matrix[i][2] * vector1.z;
-
-    }
-
-    return result; //return the resultant vector
+    return result; // Return the resultant vector
 };
 
 double linearInterpolate(double a, double b, double t) {
     return (1.0 - t) * a + t * b;
 }
 
-std::vector<double> vector_interpolate(const std::vector<double>& v1, const std::vector<double>& v2, double t, int flag) {
+Vec3D vector_interpolate(const Vec3D& v1, const Vec3D& v2, double t, int flag) {
     return {
-        linearInterpolate(v1[0],v2[0],t),
-        linearInterpolate(v1[1],v2[1],t),
-        linearInterpolate(v1[2],v2[2],t)
+        linearInterpolate(v1.x,v2.x,t),
+        linearInterpolate(v1.y,v2.y,t),
+        linearInterpolate(v1.z,v2.z,t)
     };
 };

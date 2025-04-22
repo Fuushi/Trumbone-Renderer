@@ -65,7 +65,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
 
         //static cast color to double and normalize
         //multiply channel by Lux to get color Lux
-        Vec3D color(set_magnitude(convert_vec_int_to_double(lux.lighting_contributions[i].color), 1.0));
+        Vec3D color(set_magnitude(convert_vec_int_to_double(lux.lighting_contributions[i].color.to_vec()), 1.0));
         if (lux.lighting_contributions[i].obstructed) {
             continue;
         }
