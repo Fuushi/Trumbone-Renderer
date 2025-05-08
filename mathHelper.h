@@ -50,9 +50,15 @@ Vec3D matrix_vector_multiplication(
 ); 
 
 //animator functions
+
+//clamps a value between min and max
+double clamp(double value, double min, double max);
+
 double linearInterpolate(double a, double b, double t); //self explanitory
+int linearInterpolate(int a, int b, double t); //self explanitory
 
 Vec3D vector_interpolate(const Vec3D& v1, const Vec3D& v2, double t, int flag);
+iVec3D vector_interpolate(const iVec3D& v1, const iVec3D& v2, double t, int flag);
 
 
 #endif

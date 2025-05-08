@@ -136,16 +136,15 @@ class Render {
                 //create rgb pixel
                 Ray ray = cast_ray(cam_pos, ray_euler);
 
-
                 //assign to buffer
                 buffer.rgb_buffer[x][y] = ray.color.to_vec();
-                buffer.ray_euler[x][y] = ray.reflection_vec.to_double(); //reflection vector
+                buffer.ray_euler[x][y] = ray.euler.to_double(); //reflection vector
 
                 //
                 if (!ray.reflection_color.empty) {
                     buffer.int_array_2[x][y] = ray.reflection_color.to_vec(); //reflection color
                 } else {
-                    buffer.int_array_2[x][y] = state.world.sky_color.to_vec(); //sky color
+                    buffer.int_array_2[x][y] = ray.color.to_vec(); //sky color
                 }
 
             };
@@ -269,6 +268,7 @@ class Render {
         //decide recursion
         if (recursion_depth > state.camera.max_bounce+1) {
             Ray ray;
+            ray.euler = ray_euler; //set ray euler to the current ray euler (needed for sky shader)
             return ray;
         }
 
@@ -363,7 +363,12 @@ class Render {
         // No intersect optimization (skips shader and goes straight to sky to save performance)
         if (intersects.size() == 0) {
             Ray ray;
-            ray.color = state.world.sky_color.to_vec(); //sky color
+
+            //add ray attributes for shaders
+            ray.euler = ray_euler; //set ray euler to the current ray euler (needed for sky shader)
+
+            //run sky shader (wrapper)
+            ray.color = sky_shader(ray); //sky color
             ray.reflection_color.empty=true; //set empty flag to true
             return ray;
         }
@@ -414,12 +419,13 @@ class Render {
         ray.frensel = frensel_deg;
         ray.reflection_vec = reflection_vector;
         ray.reflection_color = reflect_ray.color;
+        
 
         //based on hit object, get shader inputs (inherit from object)
         ShaderInputs& shaderInputs = closestIntersect.target.shaderInputs;
 
         //run material shader
-        std::vector<int> pixel = principled_bdsf(ray, lux, state.world, shaderInputs);
+        std::vector<int> pixel = shader_wrapper(ray, lux, state.world, shaderInputs);
 
         //assign color to ray struct
         ray.color = pixel;

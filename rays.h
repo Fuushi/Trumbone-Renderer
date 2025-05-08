@@ -1,9 +1,10 @@
-#ifndef SHADERS_H
-#define SHADERS_H
+#ifndef RAYS_H
+#define RAYS_H
 
 #include <vector>
 #include <string>
 
+#include "objects.h"
 #include "baseClasses.h"
 
 using namespace std;
@@ -165,7 +166,7 @@ class World {
     public:
 
     //world contains global render properties
-    iVec3D sky_color = {50,50,60};
+    iVec3D sky_color = {0,50,0}; //default sky color (pre shader)
 
 
     //world contains an array of elements
@@ -181,6 +182,17 @@ class World {
         lights.push_back(light);
     }
 
+    // Mockup constructor that calls the addElement function
+    World() {
+        // Create a default mesh and element
+        Mesh emptyMesh;
+        emptyMesh.faces = {}; // Initialize with empty faces   
+        emptyMesh.vertices = {}; // Initialize with empty vertices
+
+        // initialize sky element
+        Element skyObj(emptyMesh);
+        addElement(skyObj); // Add the default element to the world
+    }
 };
 
 
@@ -206,22 +218,6 @@ class State {
     public:
     World world;
     Camera camera;
-};
-
-
-struct Ray {
-    //struct contains complex data related to ray intersections
-    Vec3D origin;
-    Vec3D euler;
-    bool intersect = false; //not implemented?
-    double depth = 0.0;
-    double frensel = 0.0;
-    iVec3D color = {20,25,20}; //20,25,20
-    Vec3D intersect_point = {0.0,0.0,0.0};
-    Vec3D surface_normal = {0.0,0.0,0.0};
-    iVec3D reflection_color;
-    Vec3D reflection_vec = {0.0,0.0,0.0};
-
 };
 
 struct Intersect {
@@ -252,6 +248,11 @@ struct LightingContribution {
 struct Lux {
     std::vector<LightingContribution> lighting_contributions;
 };
+
+//shader wrapper
+std::vector<int> shader_wrapper(Ray ray, Lux lux, World world, ShaderInputs shader_inputs);
+
+std::vector<int> sky_shader(Ray ray);
 
 std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs shader_inputs);
 

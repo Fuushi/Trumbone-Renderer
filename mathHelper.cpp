@@ -102,14 +102,31 @@ Vec3D matrix_vector_multiplication(
     return result; // Return the resultant vector
 };
 
+double clamp(double value, double min, double max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
 double linearInterpolate(double a, double b, double t) {
     return (1.0 - t) * a + t * b;
 }
+int linearInterpolate(int a, int b, double t) {
+    return static_cast<int>((1.0 - t) * a + t * b);
+};
 
 Vec3D vector_interpolate(const Vec3D& v1, const Vec3D& v2, double t, int flag) {
     return {
         linearInterpolate(v1.x,v2.x,t),
         linearInterpolate(v1.y,v2.y,t),
         linearInterpolate(v1.z,v2.z,t)
+    };
+};
+//integer overload
+iVec3D vector_interpolate(const iVec3D& v1, const iVec3D& v2, double t, int flag) {
+    return {
+        static_cast<int>(linearInterpolate(v1.x,v2.x,t)),
+        static_cast<int>(linearInterpolate(v1.y,v2.y,t)),
+        static_cast<int>(linearInterpolate(v1.z,v2.z,t))
     };
 };

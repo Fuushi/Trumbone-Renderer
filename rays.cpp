@@ -5,6 +5,7 @@
 
 #include "functions.h"
 #include "mathHelper.h"
+#include "shaders.h"
 
 using namespace std;
 
@@ -48,8 +49,33 @@ std::vector<int> ambient_occlusion(Ray ray, World world) {
     return sum;
 };
 
+//shader wrapper
+std::vector<int> shader_wrapper(Ray ray, Lux lux, World world, ShaderInputs shader_inputs) {
+    //run principled bdsf shader
+    if (ray.intersect) {
+        //run principled bdsf shader
+        return principled_bdsf(ray, lux, world, shader_inputs);
+    } else {
+        //run sky shader
+        return sky_shader(ray);
+    };
+};
+
+std::vector<int> sky_shader(Ray ray) {
+    // Wrapper for the sky shader
+
+    //call gradient sky shader from shaders.h
+    std::vector<int> color = gradient_sky_shader(ray, {255,229,138}, {31,33,77}).to_vec(); //horizon color, zenith color
+    
+    //print_v(color);
+
+    //return color
+    return color; 
+
+}; //indev
+
 std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs shader_inputs) {
-    //
+    // Wrapper for the geometry shader (rename from principled_bdsf when moving logic to shaders.cpp)
 
     //Lux sums by color channel
     Vec3D sums;
@@ -97,7 +123,7 @@ std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs sha
     // before converting back to int (i need a function for this)
     iVec3D local_color = convert_vec_double_to_int((material_color.to_double()*sums).to_double());
 
-    const iVec3D sky_color = world.sky_color; //20,25,20
+    const iVec3D sky_color = sky_shader(ray); //20,25,20
     if (!ray.intersect) {
         //no intersect, return sky
         return sky_color.to_vec(); //return sky color
