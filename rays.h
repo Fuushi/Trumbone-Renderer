@@ -3,9 +3,13 @@
 
 #include <vector>
 #include <string>
+#include <sstream> //for parsing
+#include <iostream> //can be removed later
+#include <fstream> //for file reading
 
 #include "objects.h"
 #include "baseClasses.h"
+#include "functions.h" //only for debug
 
 using namespace std;
 
@@ -23,12 +27,147 @@ class Mesh {
     std::vector<iVec3D> faces;
 
     void update_mesh(const std::vector<Vec3D>& new_vertices, const std::vector<iVec3D>& new_faces) {
+        //used to pass in external mesh data
         vertices = new_vertices;
         faces = new_faces;
         return;
     }
 
-    // Default constructor that initializes an empty mesh
+    std::string load_file(const std::string& file_path) {
+        //loads file as string and returns it
+        std::ifstream file(file_path);
+        if (!file.is_open()) {
+            std::cerr << "Error opening file: " << file_path << std::endl;
+            return "";
+        }
+
+        // Read the entire file into a string
+        std::string file_content((std::istreambuf_iterator<char>(file)),
+                                  std::istreambuf_iterator<char>());
+        file.close();
+
+        return file_content;
+    }
+
+    void parse_obj(const std::string& file_path) {
+        // Parse OBJ file and populate vertices and faces
+        // This is a placeholder for actual OBJ parsing logic
+        // For now, we'll just initialize an empty mesh
+
+        //load file from path as string
+        std::string raw_file = load_file(file_path);
+
+        //parse file and extract vertices and faces
+
+        // separate by lines (\n demarkator)
+        //...
+
+        //establish stream iterable
+        std::istringstream stream(raw_file);
+        std::string line;
+
+        //clear mesh before loading
+        vertices.clear();
+        faces.clear();
+
+        //iterate by line
+        while (std::getline(stream, line)) {
+            // line dumped into line
+            if (line.empty()) continue; //skip empty lines
+
+            std::istringstream  line_stream(line);
+            std::string prefix;
+            line_stream >> prefix; // read prefix
+
+            // detect known prefixes
+            if (prefix == "v") {
+                //vertex line, parse and add to vertices
+
+                //extract vertex data
+                double x, y, z;
+                line_stream >> x >> y >> z;
+
+                //pack to Vec3D
+                Vec3D vertex(x, y, z);
+
+                //add to vertex array
+                vertices.push_back(vertex);
+            }
+            else if (prefix == "f") {
+                //face line, parse and add to faces
+
+                int v1, v2, v3; //vertex indices cache(s)
+                char slash; //slash cache
+
+                // Parse 'f v/v/v' or 'f v//v' or 'f v' to extract vertex indices only
+                //lambda function to take f"int/int/int" and return the three ints
+                auto parse_vertex = [](const std::string& input) -> std::vector<int> {
+                    size_t pos1 = input.find('/');
+                    size_t pos2 = input.find('/', pos1 + 1);
+            
+                    if (pos1 == std::string::npos || pos2 == std::string::npos) {
+                        throw std::invalid_argument("Invalid format");
+                    }
+            
+                    int a = std::stoi(input.substr(0, pos1));
+                    int b = std::stoi(input.substr(pos1 + 1, pos2 - pos1 - 1));
+                    int c = std::stoi(input.substr(pos2 + 1));
+            
+                    return {a-1, b-1, c-1};
+                };
+                
+
+                std::string v_str;
+                std::vector<int> face_indices = {0,0,0};
+
+                int i=0;
+                while (line_stream >> v_str) {
+                    
+                    //parse
+                    std::vector<int> index = parse_vertex(v_str);
+
+                    //put first element into the index of the face indices
+                    face_indices[i] = index[0];
+
+                    //other data can be extracted but is discarded for now
+
+                    i++;
+                }
+
+                //pack to iVec3D
+                iVec3D face_indices_ivec(face_indices);
+
+                //push to faces
+                faces.push_back(face_indices_ivec);
+            }
+        }
+        return;
+    }
+
+    void load_mesh(const std::string& file_path) {
+        // Load mesh from file (e.g., OBJ, STL, etc.)
+        // This is a placeholder for actual file loading logic
+        // Example: Parse OBJ or other 3D file formats
+        // For now, we'll just initialize an empty mesh
+        parse_obj(file_path); //interpret file type later
+    }
+
+    void inspect() {
+        for (int i = 0; i < vertices.size(); i++) {
+            std::cout << "Vertex: " << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << std::endl;
+        };
+        for (int i = 0; i < faces.size(); i++) {
+            std::cout << "Face: " << faces[i].x << " " << faces[i].y << " " << faces[i].z << std::endl;
+        };
+        //display metadata
+        std::cout << "Mesh has: " << vertices.size() << " vertices" << std::endl;
+        std::cout << "Mesh has: " << faces.size() << " faces" << std::endl;
+    };
+
+    // Constructor that initializes a mesh from a file path
+    Mesh(const std::string& file_path) {
+        load_mesh(file_path);
+    }
     Mesh() = default;
 };
 

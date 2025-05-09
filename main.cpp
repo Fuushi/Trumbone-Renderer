@@ -16,14 +16,6 @@ using namespace std;
 //main function
 int main() {
 
-
-    Vec3D test_vec = {0,1,1};
-    test_vec++;
-
-    Orthogonol orth = get_orthogonol(test_vec);
-
-    double rads = getUpDownAngleRadians(orth);
-
     //create mesh generator
     Procedural_meshes generator;
     
@@ -35,7 +27,7 @@ int main() {
     state.camera.vec3D_c_vec = Vec3D(1,0,0);
     
     //configure render options
-    state.camera.res=iVec2D(512,512);
+    state.camera.res=iVec2D(1024,1024);
     state.camera.max_bounce=1;
 
     //initialize buffer
@@ -63,6 +55,12 @@ int main() {
     element_0.pos={0,0,0};
     state.world.addElement(element_0);
     */
+
+    // create torus test element
+    Mesh torusMesh;
+    torusMesh.load_mesh("./assets/torus.obj");
+    Element torus(std::move(torusMesh));
+    state.world.addElement(torus);
 
 
     //create debug elements
@@ -113,7 +111,7 @@ int main() {
 
     buffer.output_buffers_to_file("./tmp/", true);
     
-    return 0; //disables animation player
+    //return 0; //disables animation player
 
     Animator animator(camera);
     animator.steps=60;
