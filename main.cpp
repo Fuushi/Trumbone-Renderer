@@ -58,7 +58,7 @@ int main() {
 
     // create torus test element
     Mesh torusMesh;
-    torusMesh.load_mesh("./assets/torus.obj");
+    torusMesh.load_mesh("./assets/sphere_1.obj");
     Element torus(std::move(torusMesh));
     state.world.addElement(torus);
 
