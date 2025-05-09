@@ -11,6 +11,7 @@ using namespace std;
 
 struct ShaderInputs {
     int objectID = 0;
+    int material_index = 0;
     double gloss_diffuse_mix_fac = 0; //0 for neutral (frensel)
     iVec3D material_color = {128,128,128}; //default grey
 };

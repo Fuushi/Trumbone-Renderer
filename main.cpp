@@ -36,7 +36,7 @@ int main() {
     
     //configure render options
     state.camera.res=iVec2D(512,512);
-    state.camera.max_bounce=0;
+    state.camera.max_bounce=1;
 
     //initialize buffer
     OutputBuffer buffer;
