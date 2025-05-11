@@ -54,7 +54,7 @@ std::vector<int> shader_wrapper(Ray ray, Lux lux, World world, ShaderInputs shad
     //run principled bdsf shader
     if (ray.intersect) {
         //run principled bdsf shader
-        return principled_bdsf(ray, lux, world, shader_inputs);
+        return geometry_shader(ray, lux, world, shader_inputs);
     } else {
         //run sky shader
         return sky_shader(ray);
@@ -74,8 +74,11 @@ std::vector<int> sky_shader(Ray ray) {
 
 }; //indev
 
-std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs shader_inputs) {
+std::vector<int> geometry_shader(Ray ray, Lux lux, World world, ShaderInputs shader_inputs) {
     // Wrapper for the geometry shader (rename from principled_bdsf when moving logic to shaders.cpp)
+
+    //drop inturrupts here...
+    //return frensel_shader(ray).to_vec(); //frensel shader inturrupt
 
     //Lux sums by color channel
     Vec3D sums;

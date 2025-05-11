@@ -394,6 +394,6 @@ std::vector<int> shader_wrapper(Ray ray, Lux lux, World world, ShaderInputs shad
 
 std::vector<int> sky_shader(Ray ray);
 
-std::vector<int> principled_bdsf(Ray ray, Lux lux, World world, ShaderInputs shader_inputs);
+std::vector<int> geometry_shader(Ray ray, Lux lux, World world, ShaderInputs shader_inputs);
 
 #endif

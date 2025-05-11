@@ -94,7 +94,7 @@ class Render {
     //uv render pass
     void generate_uvs() {
         //
-        cout << "Generating UVs" << endl;
+        cout << "Generating UVs..." << endl;
 
         int a = 0;
         for (int x = 0; x < state.camera.res.x; x++) {
@@ -114,6 +114,7 @@ class Render {
     
     //raycasting render pass
     void assign_rays() {
+        std::cout << "Casting Rays..." << std::endl;
         //get camera
         //std::vector<double> cam_pos = state.camera.vec3D_c_pos;
         //std::vector<double> cam_euler = state.camera.vec3D_c_vec;
